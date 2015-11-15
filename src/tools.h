@@ -11,19 +11,13 @@
 * KIND, either express or implied.                                             *
 *******************************************************************************/
 
-#ifndef HEADER_MAPREDUCE_COMMON_H
-    #define HEADER_MAPREDUCE_COMMON_H
+#ifndef HEADER_MAPREDUCE_TOOLS_H
+    #define HEADER_MAPREDUCE_TOOLS_H
 
-    #define TYPE_WORDSTREAMER_SCATTER    0
+    #include "common.h"
 
-    #include <stdint.h>
-    #include <stdio.h>
-    #include <stdlib.h>
-    #include <string.h>
-    #include <assert.h>
-    #include <unistd.h>
-    #include <ctype.h>
-    #include <stdbool.h>
+    /* ============================== Prototypes ============================ */
 
-    #include "timer.h"
+    long int   mr_tools_fsize(const char *);
+    long int   mr_tools_wc(const char *);
 #endif
