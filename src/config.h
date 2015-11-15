@@ -11,23 +11,18 @@
 * KIND, either express or implied.                                             *
 *******************************************************************************/
 
-#ifndef HEADER_MAPREDUCE_COMMON_H
-    #define HEADER_MAPREDUCE_COMMON_H
+#ifndef HEADER_MAPREDUCE_CONFIG_H
+    #define HEADER_MAPREDUCE_CONFIG_H
 
-    #define TYPE_SEQUENTIAL              0
-    #define TYPE_PARALLEL                1
-    #define TYPE_WORDSTREAMER_SCATTER    0
-
-    #include <stdint.h>
-    #include <stdio.h>
-    #include <stdlib.h>
-    #include <string.h>
-    #include <assert.h>
-    #include <unistd.h>
-    #include <ctype.h>
-    #include <stdbool.h>
-
-    #include "config.h"
-    #include "error.h"
-    #include "timer.h"
+    #define MAPREDUCE_DEFAULT_TYPE            TYPE_SEQUENTIAL
+    #define MAPREDUCE_DEFAULT_USECOLORS       1
+    #define MAPREDUCE_DEFAULT_QUIET           0
+    #define MAPREDUCE_DEFAULT_PROFILING       0
+    #define MAPREDUCE_MIN_THREADS             1
+    #define MAPREDUCE_MAX_THREADS             64
+    #define MAPREDUCE_USE_BUFFALLOC           1
+    #define MAPREDUCE_BUFFALLOC_CHUNK_SIZE    1024
+    #define MAPREDUCE_MAX_WORD_SIZE           (MAPREDUCE_BUFFALLOC_CHUNK_SIZE-1)
+    #define MAPREDUCE_VERSION                 "0.1"
+    #define MAPREDUCE_CONTACT                 "contact [at] jean-yves [dot] vet"
 #endif
