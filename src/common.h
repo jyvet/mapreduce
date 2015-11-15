@@ -23,4 +23,5 @@
     #include <ctype.h>
     #include <stdbool.h>
 
+    #include "timer.h"
 #endif
