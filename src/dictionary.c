@@ -20,8 +20,6 @@
 
 #include "dictionary.h"
 
-#define MAPREDUCE_MAX_WORD_SIZE 128
-
 /* ========================= Constructor / Destructor ======================= */
 
 /**
