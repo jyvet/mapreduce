@@ -6,8 +6,8 @@ The purpose of this program is to compute the number of occurrences of each word
 Dependencies
 ------------
 
-* cmake [apt-get install cmake]
-* check (only to compile/launch unit tests) [apt-get install check]
+* cmake *[apt-get install cmake]*
+* check (only to compile/launch unit tests) *[apt-get install check]*
 
 
 Building MapReduce
@@ -31,15 +31,16 @@ Running MapReduce
     % bin/mapred [OPTION...] <file> <Nthreads> 
 
 
-**file:** path to a file containing words
-
-**Nthreads:** number of threads to use
+* **file:** path to a file containing words
+* **Nthreads:** number of threads to use
 
 
 Options are :
 
     -p, --profiling            Activate profiling
     -q, --quiet                Do not output results
+    -t, --type=MR_TYPE         Mapreduce type (0=PARALLEL, 1=SEQUENTIAL)
+    -w, --wtype=WS_TYPE        WordStreamer type (0=SCATTER, 1=INTERLEAVE)
     -?, --help                 Give this help list
         --usage                Give a short usage message
     -V, --version              Print program version

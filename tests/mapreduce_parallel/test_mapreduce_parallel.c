@@ -31,7 +31,8 @@ START_TEST (test_create_delete)
     char *content = "content tests";
     create_file(filename, content);
 
-    Mapreduce *mr = mr_parallel_create(filename, 1, false, false);
+    Mapreduce *mr = mr_parallel_create(filename, 1, TYPE_WORDSTREAMER_SCATTER,
+                                                                  false, false);
 
     ck_assert_ptr_ne(mr, NULL);
 

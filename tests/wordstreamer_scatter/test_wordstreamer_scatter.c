@@ -53,7 +53,7 @@ START_TEST (test_singlestreamer_get)
 {
     /* Create test file */
     char *filename = "ws_test.txt";
-    char *content = ".Donec!, ut  libero sed. ";//25
+    char *content = ".Donec!, ut  libero sed. ";
     create_file(filename, content);
 
     Wordstreamer *ws = mr_wordstreamer_scatter_create_first(filename, 1, false);
@@ -165,7 +165,7 @@ END_TEST
 
 Suite *wordstreamer_scatter_suite(void) {
     Suite *suite = suite_create("Wordstreamer Scatter");
-    TCase *tcase1 = tcase_create("Case Create");
+    TCase *tcase1 = tcase_create("Case Create Delete");
     TCase *tcase2 = tcase_create("Case Single streamer Get");
     TCase *tcase3 = tcase_create("Case mutiple streamers Get");
 

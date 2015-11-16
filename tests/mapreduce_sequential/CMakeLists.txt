@@ -14,7 +14,7 @@ SET (LIBS ${LIBS} ${CHECK_LIBRARIES})
 
 INCLUDE_DIRECTORIES (. ${CMAKE_CURRENT_SOURCE_DIR}/../../src)
 
-ADD_EXECUTABLE (${TEST_NAME} ${SRC_PATH}/${NAME}.c ${SRC_PATH}/word.c ${SRC_PATH}/tools.c ${SRC_PATH}/dictionary.c ${SRC_PATH}/buffalloc.c ${SRC_PATH}/buffalloc.c ${SRC_PATH}/wordstreamer.c ${SRC_PATH}/wordstreamer_scatter.c ${SRC_PATH}/mapreduce.c ${SRC_PATH}/mapreduce_parallel.c ${TEST_NAME}.c)
+ADD_EXECUTABLE (${TEST_NAME} ${SRC_PATH}/${NAME}.c ${SRC_PATH}/word.c ${SRC_PATH}/tools.c ${SRC_PATH}/dictionary.c ${SRC_PATH}/buffalloc.c ${SRC_PATH}/buffalloc.c ${SRC_PATH}/wordstreamer.c ${SRC_PATH}/wordstreamer_scatter.c ${SRC_PATH}/wordstreamer_interleave.c ${SRC_PATH}/mapreduce.c ${SRC_PATH}/mapreduce_parallel.c ${TEST_NAME}.c)
 
 TARGET_LINK_LIBRARIES (${TEST_NAME} ${LIBS} pthread)
 

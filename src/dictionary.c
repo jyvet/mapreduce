@@ -32,7 +32,7 @@ Dictionary *mr_dictionary_create(bool profiling) {
     Dictionary *dico = malloc(sizeof(Dictionary));
     assert(dico != NULL);
 
-    /* Initilaize variables for profiling */
+    /* Initialize variables for profiling */
     dico->profiling = profiling;
     _timer_init(&dico->timer_put, dico->profiling);
     _timer_init(&dico->timer_hash, dico->profiling);
@@ -290,7 +290,7 @@ void mr_dictionary_display(Dictionary *dico) {
     for (int i=0; i<hash_size; i++){
         Bucket *bucket = &dico->hash_tab[i];
         Word *word = bucket->word;
-        
+
         while(word != NULL) {
             printf("%s=%d\n", word->name, word->count);
             word = word->next;

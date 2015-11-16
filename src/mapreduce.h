@@ -42,8 +42,8 @@
     Mapreduce*   mr_common_create(const char *, const int, const int,
                                                         const bool, const bool);
     Mapreduce*   mr_create(Arguments*);
-    Mapreduce*   _mr_create(const char*, const int, const int, const bool,
-                                                                    const bool);
+    Mapreduce*   _mr_create(const char*, const int, const int, const int,
+                                                        const bool, const bool);
     void         mr_delete(Mapreduce**);
     void         mr_map(Mapreduce*);
     void         mr_reduce(Mapreduce*);

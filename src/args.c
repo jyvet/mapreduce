@@ -26,23 +26,28 @@ const char *argp_program_version = "MapReduce "MAPREDUCE_VERSION;
 const char *argp_program_bug_address = "<"MAPREDUCE_CONTACT">";
 
 /* Program documentation */
-static char doc[] = "The program launches N threads to compute the number of"
-    "occurrences of words in a file. The program accepts the following optional"
-    "arguments:";
+static char doc[] = "The program launches N threads to compute the number of "
+    "occurrences of words in a file. The program accepts the following "
+    "optional arguments:";
 
 /* A description of the arguments we accept */
 static char args_doc[] = "<file> <Nthreads>";
 
 /* The options we understand */
 static struct argp_option options[] = {
-    {"profiling",   'p', 0, 0, "Activate profiling"},
-    {"quiet",       'q', 0, 0, "Do not output results"},
+    {"profiling",  'p', 0,         0, "Activate profiling"},
+    {"quiet",      'q', 0,         0, "Do not output results"},
+    {"type",       't', "MR_TYPE", 0, "Mapreduce type "
+                                      "(0=PARALLEL, 1=SEQUENTIAL)"},
+    {"wtype",      'w', "WS_TYPE", 0, "WordStreamer type "
+                                      "(0=SCATTER, 1=INTERLEAVE)"},
     { 0 }
 };
 
 /* Parse a single option */
 static error_t parse_opt (int key, char *arg, struct argp_state *state) {
     Arguments *args = state->input;
+    int type = 0;
 
     switch (key) {
         case 'p':
@@ -50,6 +55,20 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
           	break;
         case 'q':
             args->quiet = true;
+            break;
+        case 't':
+            type = atoi(arg);
+            if (type == TYPE_PARALLEL
+                || type == TYPE_SEQUENTIAL) {
+                args->type = type;
+            }
+            break;
+        case 'w':
+            type = atoi(arg);
+            if (type == TYPE_WORDSTREAMER_SCATTER
+                || type == TYPE_WORDSTREAMER_INTERLEAVE) {
+                args->ws_type = type;
+            }
             break;
         case ARGP_KEY_ARG:
     	   if (state->arg_num == 0) {
@@ -127,9 +146,10 @@ Arguments* mr_args_create(int argc, char **argv) {
     assert(args != NULL);
 
     /* Initialize options with default values */
-    args->quiet      = MAPREDUCE_DEFAULT_QUIET;
-    args->profiling  = MAPREDUCE_DEFAULT_PROFILING;
-    args->type       = MAPREDUCE_DEFAULT_TYPE;
+    args->quiet      =   MAPREDUCE_DEFAULT_QUIET;
+    args->profiling  =   MAPREDUCE_DEFAULT_PROFILING;
+    args->ws_type    =   MAPREDUCE_WS_DEFAULT_TYPE;
+    args->type       =   MAPREDUCE_DEFAULT_TYPE;
 
     return args;
 }

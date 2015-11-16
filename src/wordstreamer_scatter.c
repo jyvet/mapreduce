@@ -184,13 +184,13 @@ static inline void _mr_wordstreamer_retrieve_word(Wordstreamer *ws,
  * Get next word from a wordstreamer. Return 1 if end of stream reached.
  *
  * @param   ws[in]               Pointer to the Wordstreamer structure
- * @param   shared_map[out]    Buffer to hold the retrieved word
+ * @param   shared_map[out]      Buffer to hold the retrieved word
  * @return  0 if a word was copied into the buffer or 1 if the end of the stream
  *          was reached
  */
 int mr_wordstreamer_scatter_get(Wordstreamer *ws, char *buffer) {
     _timer_start(&ws->timer_get);
-    int streamer_id = ws-> streamer_id;
+    int streamer_id = ws->streamer_id;
     char* map = ws->shared_map;
     long int offset, file_size = ws->file_size, start_offset = ws->start_offset;
     long int stop_offset = ws->stop_offset;

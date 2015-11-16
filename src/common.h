@@ -14,9 +14,10 @@
 #ifndef HEADER_MAPREDUCE_COMMON_H
     #define HEADER_MAPREDUCE_COMMON_H
 
-    #define TYPE_SEQUENTIAL              0
-    #define TYPE_PARALLEL                1
-    #define TYPE_WORDSTREAMER_SCATTER    0
+    #define TYPE_PARALLEL                    0
+    #define TYPE_SEQUENTIAL                  1
+    #define TYPE_WORDSTREAMER_SCATTER        0
+    #define TYPE_WORDSTREAMER_INTERLEAVE     1
 
     #include <stdint.h>
     #include <stdio.h>

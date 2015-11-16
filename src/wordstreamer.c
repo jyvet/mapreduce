@@ -24,6 +24,7 @@
 #include "tools.h"
 #include "wordstreamer.h"
 #include "wordstreamer_scatter.h"
+#include "wordstreamer_interleave.h"
 
 /* ========================= Constructor / Destructor ======================= */
 
@@ -42,6 +43,10 @@ Wordstreamer* mr_wordstreamer_create_first (const char* file_path,
 
     switch(type) {
         default:
+        case TYPE_WORDSTREAMER_INTERLEAVE :
+            ws = mr_wordstreamer_interleave_create_first(file_path,
+                                                       nb_streamers, profiling);
+            break;
         case TYPE_WORDSTREAMER_SCATTER :
             ws = mr_wordstreamer_scatter_create_first(file_path, nb_streamers,
                                                                      profiling);

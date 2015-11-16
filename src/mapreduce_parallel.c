@@ -31,7 +31,8 @@
  * @param  profiling[in]    Activate the profiling mode
  * @return  A Mapreduce structure
  */
-Mapreduce* mr_parallel_create(const char *file_path, unsigned int nb_threads,
+Mapreduce* mr_parallel_create(const char *file_path,
+                               const unsigned int nb_threads, const int ws_type,
                                        const bool quiet, const bool profiling) {
     Mapreduce *mr = mr_common_create(file_path, nb_threads, TYPE_PARALLEL,
                                                               quiet, profiling);
@@ -46,7 +47,7 @@ Mapreduce* mr_parallel_create(const char *file_path, unsigned int nb_threads,
 
     /* First thread */
     threads[0].wordstreamer = mr_wordstreamer_create_first(file_path,
-                              nb_threads, TYPE_WORDSTREAMER_SCATTER, profiling);
+                                                nb_threads, ws_type, profiling);
     threads[0].dictionary = mr_dictionary_create(profiling);
     threads[0].thread = malloc(sizeof(pthread_t));
     assert(threads[0].thread != NULL);
