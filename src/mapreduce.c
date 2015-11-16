@@ -102,14 +102,14 @@ void mr_delete(Mapreduce **mr_ptr) {
  */
 void _stats_total(Mapreduce *mr) {
     if (mr->profiling) {
-        long int fsize = mr_tools_fsize(mr->file_path)/1048576.0;
+        double fsize = mr_tools_fsize(mr->file_path)/1048576.0;
         long int words = mr_tools_wc(mr->file_path);
         Timer *timer_global = &mr->timer_global;
         double elapsed = ((double)timer_global->elapsed)/1E6;
 
         if (elapsed > 0.001) {
             #if MAPREDUCE_DEFAULT_USECOLORS
-                printf("\e[33m |---> [File Size: %ld MB]  -> "
+                printf("\e[33m |---> [File Size: %.3f MB]  -> "
                        "\e[1;33m %.3f MB/s\e[0m\n",
                        fsize, ((double)fsize/elapsed));
                 printf("\e[33m |---> [Words: %ld]  -> "
