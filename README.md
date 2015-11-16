@@ -1,6 +1,6 @@
 MapReduce
 ---------
-The purpose of this program is to compute the number of occurences of each word in a given file. The program implements a map/reduce paradigm in shared memory using pthreads.
+The purpose of this program is to compute the number of occurrences of each word in a given file. The program implements a map/reduce paradigm in shared memory using pthreads.
 
 
 Dependencies

@@ -23,6 +23,6 @@
     #define MAPREDUCE_USE_BUFFALLOC           1
     #define MAPREDUCE_BUFFALLOC_CHUNK_SIZE    1024
     #define MAPREDUCE_MAX_WORD_SIZE           (MAPREDUCE_BUFFALLOC_CHUNK_SIZE-1)
-    #define MAPREDUCE_VERSION                 "0.1"
+    #define MAPREDUCE_VERSION                 "0.2"
     #define MAPREDUCE_CONTACT                 "contact [at] jean-yves [dot] vet"
 #endif
