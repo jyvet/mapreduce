@@ -19,6 +19,7 @@ IF(BUILD_TESTS)
     ADD_TEST(NAME test_wordstreamer_scatter COMMAND test_wordstreamer_scatter)
     ADD_TEST(NAME test_dictionary COMMAND test_dictionary)
     ADD_TEST(NAME test_mapreduce_sequential COMMAND test_mapreduce_sequential)
+    ADD_TEST(NAME test_mapreduce_parallel COMMAND test_mapreduce_parallel)
 
     MESSAGE( STATUS "Tests folder added." )
 ENDIF(BUILD_TESTS)

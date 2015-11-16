@@ -19,6 +19,7 @@
 
 #include "mapreduce.h"
 #include "mapreduce_sequential.h"
+#include "mapreduce_parallel.h"
 #include "tools.h"
 
 void _stats_total(Mapreduce *);
@@ -41,6 +42,9 @@ Mapreduce* _mr_create(const char *file_path, const int nb_threads,
 
     switch(type) {
         default:
+        case TYPE_PARALLEL :
+            mr = mr_parallel_create(file_path, nb_threads, quiet, profiling);
+            break;
         case TYPE_SEQUENTIAL :
             mr = mr_sequential_create(file_path, quiet, profiling);
             break;
