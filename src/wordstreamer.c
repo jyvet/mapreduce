@@ -72,6 +72,9 @@ Wordstreamer* mr_wordstreamer_create_another(Wordstreamer* first,
 
     switch(type) {
         default:
+        case TYPE_WORDSTREAMER_INTERLEAVE :
+            ws = mr_wordstreamer_interleave_create_another(first, streamer_id);
+            break;
         case TYPE_WORDSTREAMER_SCATTER :
             ws = mr_wordstreamer_scatter_create_another(first, streamer_id);
             break;

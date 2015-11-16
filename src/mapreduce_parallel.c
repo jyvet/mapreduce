@@ -122,7 +122,6 @@ void mr_parallel_map(Mapreduce *mr) {
 
     /* Launch all threads */
     for(int i=0; i<nb_threads; i++) {
-        // int ret;
         pthread_create(threads[i].thread, NULL, _thread_map, &threads[i]);
     }
 

@@ -14,7 +14,7 @@
 #include "wordstreamer_interleave.h"
 #include <check.h>
 
-#define MAX_STREAMERS 11
+#define MAX_STREAMERS 8
 
 void create_file(const char *filename, const char *content) {
     FILE *fp;
@@ -92,7 +92,7 @@ END_TEST
 
 START_TEST (test_multiplestreamer_get)
 {
-    // Create test file
+    /* Create test file */
     char *filename = "ws_test.txt";
     char *content = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. "
                     "Donec a diam lectus. Sed sit amet ipsum mauris. Maecenas "
@@ -115,7 +115,7 @@ START_TEST (test_multiplestreamer_get)
 
     create_file(filename, content);
 
-    // Sequential streamer as a reference
+    /* Sequential streamer as a reference */
     Wordstreamer *ws_ref = mr_wordstreamer_interleave_create_first(filename, 1,
                                                                          false);
     char ref[4096];
@@ -131,9 +131,9 @@ START_TEST (test_multiplestreamer_get)
     mr_wordstreamer_interleave_delete(ws_ref);
 
 
-    // Check several streamers combination
+    /* Check several streamers combination */
     for (int i=2; i<=MAX_STREAMERS; i++) {
-        char comp[4096];
+        char comp[4096000];
         int ret = 0;
         int first = 1;
 
@@ -165,6 +165,7 @@ START_TEST (test_multiplestreamer_get)
         for(int s=0; s<i; s++) {
             mr_wordstreamer_interleave_delete(ws[s]);
         }
+
         free(ws);
 
         ck_assert_str_eq(comp, ref);
