@@ -14,6 +14,8 @@
 #include <check.h>
 #include "mapreduce_parallel.h"
 
+#define MAX_THREADS 11
+
 void create_file(const char *filename, const char *content) {
     FILE *fp;
     fp = fopen (filename,"w");
@@ -32,7 +34,7 @@ START_TEST (test_create_delete)
     create_file(filename, content);
 
     Mapreduce *mr = mr_parallel_create(filename, 1, TYPE_WORDSTREAMER_SCATTER,
-                                                                  false, false);
+                                                                   true, false);
 
     ck_assert_ptr_ne(mr, NULL);
 
@@ -44,53 +46,75 @@ START_TEST (test_create_delete)
 END_TEST
 
 
-/*
-START_TEST (test_delete)
+START_TEST (test_multiple_mapreduce)
 {
-    Dictionary *dico = dictionary_create(256);
+    /* Create test file */
+    char *filename = "ws_test.txt";
+    char *content = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. "
+                    "Donec a diam lectus. Sed sit amet ipsum mauris. Maecenas "
+                    "congue ligula ac quam viverra nec consectetur ante "
+                    "hendrerit. Donec et mollis dolor. Praesent et diam eget "
+                    "libero egestas mattis sit amet vitae augue. Nam tincidunt "
+                    "congue enim, ut porta lorem lacinia consectetur. Donec ut "
+                    "libero sed arcu vehicula ultricies a non tortor. Lorem "
+                    "ipsum dolor sit amet, consectetur adipiscing elit. Aenean "
+                    "ut gravida lorem. Ut turpis felis, pulvinar a semper sed, "
+                    "adipiscing id dolor. Pellentesque auctor nisi id magna "
+                    "consequat sagittis. Curabitur dapibus enim sit amet elit "
+                    "pharetra tincidunt feugiat nisl imperdiet. Ut convallis "
+                    "libero in urna ultrices accumsan. Donec sed odio eros. "
+                    "Donec viverra mi quis quam pulvinar at malesuada arcu "
+                    "rhoncus. Cum sociis natoque penatibus et magnis dis "
+                    "parturient montes, nascetur ridiculus mus. In rutrum "
+                    "accumsan ultricies. Mauris vitae nisi at sem facilisis "
+                    "semper ac in est.";
 
-    dictionary_delete(&dico);
-    ck_assert_ptr_eq(dico, NULL);
+    create_file(filename, content);
+
+    /* Check several streamers combination */
+
+    for (int i=1; i<=MAX_THREADS; i++) {
+        Mapreduce *mr = mr_parallel_create(filename, i,
+                                        TYPE_WORDSTREAMER_SCATTER, true, false);
+
+        ck_assert_ptr_ne(mr, NULL);
+
+        ck_assert_ptr_ne(mr->ext, NULL);
+        Mapreduce_parallel_thread *ext = (Mapreduce_parallel_thread *) mr->ext;
+
+        ck_assert_ptr_ne(ext->dictionary, NULL);
+        Dictionary *dico = ext->dictionary;
+
+        /* Perform map and reduce */
+        mr_parallel_map(mr);
+        mr_parallel_reduce(mr);
+
+        /* Check some occurences */
+        ck_assert_int_eq(mr_dictionary_count_word(dico, "adipiscing"), 3);
+        ck_assert_int_eq(mr_dictionary_count_word(dico, "consectetur"), 4);
+        ck_assert_int_eq(mr_dictionary_count_word(dico, "amet"), 5);
+        ck_assert_int_eq(mr_dictionary_count_word(dico, "pharetra"), 1);
+        ck_assert_int_eq(mr_dictionary_count_word(dico, "sit"), 5);
+        ck_assert_int_eq(mr_dictionary_count_word(dico, "viverra"), 2);
+
+        mr_parallel_delete(mr);
+    }
+
+    remove(filename);
 }
 END_TEST
 
-
-START_TEST (test_put)
-{
-    Dictionary *dico = dictionary_create(256);
-
-    dictionary_put_word(dico, "max");
-    dictionary_put_word(dico, "sam");
-    dictionary_put_word(dico, "lechuck");
-    dictionary_put_word(dico, "guybrush");
-    dictionary_put_word(dico, "fred");
-    dictionary_put_word(dico, "sam");
-    dictionary_put_word(dico, "samandmax");
-    dictionary_put_word(dico, "bernard");
-    dictionary_put_word(dico, "sam");
-    dictionary_put_word(dico, "samm");
-
-    ck_assert_int_eq(dictionary_count_word(dico, "max"), 1);
-    ck_assert_int_eq(dictionary_count_word(dico, "sam"), 3);
-
-    dictionary_delete(&dico);
-}
-END_TEST
-*/
 
 Suite *mapreduce_suite(void) {
     Suite *suite = suite_create("Mapreduce parallel");
     TCase *tcase1 = tcase_create("Case Create Delete");
-    //TCase *tcase2 = tcase_create("Case Delete");
-    //TCase *tcase3 = tcase_create("Case Put");
+    TCase *tcase2 = tcase_create("Case Multiple MapReduce");
 
     tcase_add_test(tcase1, test_create_delete);
-    //tcase_add_test(tcase2, test_delete);
-    //tcase_add_test(tcase3, test_put);
+    tcase_add_test(tcase2, test_multiple_mapreduce);
 
     suite_add_tcase(suite, tcase1);
-    //suite_add_tcase(suite, tcase2);
-    //suite_add_tcase(suite, tcase3);
+    suite_add_tcase(suite, tcase2);
 
     return suite;
 }
