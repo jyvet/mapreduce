@@ -35,7 +35,7 @@
         long int     chunk_size;   /**<  Chunk size for the Wordstreamer      */
         long int     offset;       /**<  Offset index for the next character  */
         int          fd;           /**<  File descriptor                      */
-        unsigned int type;         /**<  Type of Wordstreamer                 */
+        unsigned int type;         /**<  Type of Wordstreamer (see common.h)  */
         unsigned int streamer_id;  /**<  Id of the current Wordstreamer       */
         unsigned int nb_streamers; /**<  Total number of streamers            */
         Timer        timer_get;    /**<  Timer for get func. [Profiling mode] */

@@ -32,7 +32,7 @@
  *
  * @param   file_path[in]     String containing the path to the file to read
  * @param   nb_streamers[in]  Total number of streamers
- * @param   type[in]          Type of Wordstreamer to use
+ * @param   type[in]          Type of Wordstreamer (see common.h)
  * @param   profiling[in]     Activate the profiling mode
  * @return  Pointer to the new Wordstreamer structure
  */

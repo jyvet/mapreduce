@@ -23,7 +23,7 @@
     typedef struct arguments_s {
         char*        file_path;    /**<  Path to the file to open          */
         unsigned int nb_threads;   /**<  Number of thread worker used      */
-        bool         profiling;    /**<  Display every details             */
+        bool         profiling;    /**<  Profiling mode                    */
         bool         quiet;        /**<  Display every details             */
         int          type;         /**<  Type of mapreduce (see common.h)  */
     } Arguments;
