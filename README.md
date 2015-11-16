@@ -95,3 +95,31 @@ will display something similar to:
     |---> [File Size: 0.087 MB]  ->  6.904 MB/s
     |---> [Words: 13436]  ->  1.071 MWords/s
 
+
+Benchmark
+---------
+
+Tests are performed with an *Intel i5-3427U CPU* @ 1.80GHz (4 SMT, 2 cores) and a SSD *Kingston SSDNow mS200* as a support storage for a 100MB source file. Best performances are obtained wih the scatter mode.
+
+    % ./mapred lorem_verylarge.txt 4 -w 0 -q -p
+    |-[WordStreamer 0] get: 844.262 ms
+    |-[Dictionary] hash function: 151.677 ms
+    |-[Dictionary] put: 2508.536 ms
+    |-[WordStreamer 1] get: 808.657 ms
+    |-[Dictionary] hash function: 152.090 ms
+    |-[Dictionary] put: 2548.914 ms
+    |-[WordStreamer 2] get: 805.632 ms
+    |-[Dictionary] hash function: 151.849 ms
+    |-[Dictionary] put: 2545.457 ms
+    |-[WordStreamer 3] get: 810.067 ms
+    |-[Dictionary] hash function: 151.784 ms
+    |-[Dictionary] put: 2558.705 ms
+    |-[MapReduce] map: 3567.679 ms
+    |-[MapReduce] reduce: 21.714 ms
+    |---> TOTAL: 3592.929 ms
+    |---> [File Size: 100.502 MB]  ->  27.972 MB/s
+    |---> [Words: 15533581]  ->  4.323 MWords/s
+
+
+![Performance test](/data/scatter.png)
+*(averaged data across 10 runs)*
