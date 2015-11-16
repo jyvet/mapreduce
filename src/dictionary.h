@@ -16,6 +16,7 @@
 
     #include "common.h"
     #include "word.h"
+    #include "buffalloc.h"
 
     #define HASH_CHAR_SIZE 256
     #define HASH_CHARS_USED 2
@@ -27,6 +28,9 @@
      */
     typedef struct bucket_s {
         Word *word;                  /**<  String containing the word         */
+        #if MAPREDUCE_USE_BUFFALLOC
+            Buffalloc *buffalloc;    /**<  Pointer to a buffer to alloc words */
+        #endif
     } Bucket;
 
 

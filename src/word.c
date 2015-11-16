@@ -43,6 +43,28 @@ Word* mr_word_create(const char *src_word) {
 
 
 /**
+ * Create a Word structure based on the provided string. It uses a buffer to
+ * allow multiple words to be stored in consecutive areas in memory.
+ *
+ * @param   src_word[in]   String containing the spelling of the word
+ * @param   ba[inout]      Pointer to a buffer structure to manage allocation
+ * @return  Pointer to the new Word structure
+ */
+Word* mr_word_create_buff(const char *src_word, Buffalloc *ba) {
+    assert(src_word != NULL);
+    int length = strlen(src_word);
+
+    /* Allocate at one the Word structure and the string size */
+    Word *word = mr_buffalloc_malloc(ba, sizeof(Word)+length+1);
+
+    _mr_word_init(word, src_word, length);
+
+    return word;
+}
+
+
+
+/**
  * Delete Word structure and set pointer to NULL.
  *
  * @param   word_ptr[inout]     Pointer to pointer of Word structure

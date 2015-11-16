@@ -15,6 +15,7 @@
     #define HEADER_MAPREDUCE_WORD_H
 
     #include "common.h"
+    #include "buffalloc.h"
 
     /**
      * @struct struct word_s
@@ -37,5 +38,6 @@
     /* ============================== Prototypes ============================ */
 
     Word*   mr_word_create(const char*);
+    Word*   mr_word_create_buff(const char *, Buffalloc*);
     void    mr_word_delete(Word**);
 #endif

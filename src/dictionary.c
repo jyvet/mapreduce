@@ -46,6 +46,9 @@ Dictionary *mr_dictionary_create(bool profiling) {
     for (int i=0; i<dico->hash_size; i++){
         Bucket *b = &dico->hash_tab[i];
         b->word = NULL;
+        #if MAPREDUCE_USE_BUFFALLOC
+            b->buffalloc = NULL;
+        #endif
     }
 
     return dico;
@@ -73,12 +76,16 @@ void mr_dictionary_delete(Dictionary **ptr_dico) {
         for (int i=0; i<hash_size; i++){
             Bucket *bucket = &dico->hash_tab[i];
 
-            Word *word = bucket->word;
-            while(word != NULL) {
-                Word *word_ptr = word;
-                word = word->next;
-                mr_word_delete(&word_ptr);
-            }
+            #if MAPREDUCE_USE_BUFFALLOC
+                mr_buffalloc_delete(&bucket->buffalloc);
+            #else
+                Word *word = bucket->word;
+                while(word != NULL) {
+                    Word *word_ptr = word;
+                    word = word->next;
+                    mr_word_delete(&word_ptr);
+                }
+            #endif
         }
 
         /* Delete dictionary structure */
@@ -176,7 +183,14 @@ void _mr_dictionary_add_word_count(Dictionary *dico, const char *word,
     while (pos < MAPREDUCE_MAX_WORD_SIZE) {
         /* Empty bucket */
         if (dico_word == NULL) {
-            *ptr = mr_word_create(word);
+            #if MAPREDUCE_USE_BUFFALLOC
+                if(bucket->buffalloc == NULL) {
+                    bucket->buffalloc = mr_buffalloc_create();
+                }
+                *ptr = mr_word_create_buff(word, bucket->buffalloc);
+            #else
+                *ptr = mr_word_create(word);
+            #endif
             (*ptr)->count = count;
             break;
         }
@@ -186,7 +200,14 @@ void _mr_dictionary_add_word_count(Dictionary *dico, const char *word,
         int dest = _mr_dictionary_char_value(dest_word, dico_word->length, pos);
 
         if (src < dest) {
-            Word *new_word = mr_word_create(word);
+            #if MAPREDUCE_USE_BUFFALLOC
+                if(bucket->buffalloc == NULL) {
+                    bucket->buffalloc = mr_buffalloc_create();
+                }
+                Word *new_word = mr_word_create_buff(word, bucket->buffalloc);
+            #else
+                Word *new_word = mr_word_create(word);
+            #endif
             new_word->count = count;
             *ptr = new_word;
             new_word->next = dico_word;
