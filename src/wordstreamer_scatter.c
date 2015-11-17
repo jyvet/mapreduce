@@ -208,15 +208,15 @@ int mr_wordstreamer_scatter_get(Wordstreamer *ws, char *buffer) {
         /* Retrieve a complete word */
         _mr_wordstreamer_retrieve_word(ws, file_size, buffer, map);
 
-        if (ws->offset >= stop_offset) ws->end = true;
+        if (ws->offset > stop_offset) ws->end = true;
         _timer_stop(&ws->timer_get);
 
         return 0;
     } else {
         char character = map[offset];
-
+ 
         /* Retrieve one more word (last word on two chunks) */
-        if(!ispunct(character) && !isspace(character) && offset < file_size) {
+        if(offset== stop_offset && !ispunct(character) && !isspace(character) && offset < file_size) {
 
             _mr_wordstreamer_retrieve_word(ws, file_size, buffer, map);
             ws->end = true;
