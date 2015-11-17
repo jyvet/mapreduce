@@ -135,7 +135,7 @@ Wordstreamer* _mr_wordstreamer_common_create(
         ws->fd = open(file_path, O_RDONLY | O_NONBLOCK);
         assert(ws->fd >= 0);
 
-        ws->shared_map = mmap(NULL, ws->file_size, PROT_READ, MAP_SHARED,
+        ws->shared_map = mmap(NULL, ws->file_size, PROT_READ, MAP_PRIVATE,
                                                                      ws->fd, 0);
         assert(ws->shared_map != MAP_FAILED);
     } else {
