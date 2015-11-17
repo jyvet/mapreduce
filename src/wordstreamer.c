@@ -135,9 +135,14 @@ Wordstreamer* _mr_wordstreamer_common_create(
         ws->fd = open(file_path, O_RDONLY | O_NONBLOCK);
         assert(ws->fd >= 0);
 
-        ws->shared_map = mmap(NULL, ws->file_size, PROT_READ, MAP_PRIVATE,
-                                                                     ws->fd, 0);
+        /* Map file to memory to make accesses from multiple threads easier */
+        ws->shared_map = mmap(NULL, ws->file_size, PROT_READ,
+                                        MAP_PRIVATE | MAP_POPULATE,  ws->fd, 0);
         assert(ws->shared_map != MAP_FAILED);
+
+        /* Advise the kernel we need to read completely the mapped file in
+           sequential order */
+        madvise(ws->shared_map, ws->file_size, MADV_SEQUENTIAL | MADV_WILLNEED);
     } else {
         assert(shared_map != NULL);
         ws->shared_map = shared_map;
