@@ -1,0 +1,16 @@
+language: c
+compiler:
+  - gcc
+before_install:
+  - travis_retry sudo apt-get update
+  - travis_retry sudo apt-get install cmake check
+before_script:
+  - mkdir build
+  - cd build
+  - cmake -D BUILD_TESTS:BOOL=TRUE ..
+script:
+  - make
+  - ctest
+branches:
+  only:
+    - master
