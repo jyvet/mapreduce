@@ -26,7 +26,7 @@
         bool         profiling;      /**<  Profiling mode                     */
         bool         quiet;          /**<  Display every details              */
         ws_type      wstreamer_type; /**<  Type of wordstreamer (see common.h)*/
-        int          type;           /**<  Type of mapreduce (see common.h)   */
+        mr_type      type;           /**<  Type of mapreduce (see common.h)   */
     } Arguments;
 
 

@@ -32,7 +32,7 @@
  */
 Mapreduce* mr_sequential_create(const char *file_path,
          const ws_type wstreamer_type, const bool quiet, const bool profiling) {
-    Mapreduce *mr = mr_common_create(file_path, 1, TYPE_SEQUENTIAL,
+    Mapreduce *mr = _mr_common_create(file_path, 1, MR_SEQUENTIAL,
                                                               quiet, profiling);
     /* Set function pointers */
     mr->map = mr_sequential_map;

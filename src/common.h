@@ -16,14 +16,15 @@
 
     typedef enum {
         WS_SCHUNKS,         /* Wordstreamer type: scattered chunks   */
-        WS_ICHUNKS,         /* Wordstreamer type: interleaved chunks */
         WS_IWORDS,          /* Wordstreamer type: interleaved words  */
-        WS_NB               /* Number of Wordstreamers               */
+        WS_NB               /* Number of Wordstreamer types          */
     } ws_type;
 
-
-    #define TYPE_PARALLEL                    0
-    #define TYPE_SEQUENTIAL                  1
+    typedef enum {
+        MR_PARALLEL,         /* Mapreduce type: parallel (pthreads)   */
+        MR_SEQUENTIAL,       /* Mapreduce type: sequential            */
+        MR_NB                /* Number of Mapreduce types             */
+    } mr_type;
 
     #include <stdint.h>
     #include <stdio.h>

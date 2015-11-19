@@ -59,8 +59,7 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
             break;
         case 't':
             type = atoi(arg);
-            if (type == TYPE_PARALLEL
-                || type == TYPE_SEQUENTIAL) {
+            if (type < WS_NB) {
                 args->type = type;
             }
             break;

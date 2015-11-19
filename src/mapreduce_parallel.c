@@ -35,7 +35,7 @@ Mapreduce* mr_parallel_create(const char *file_path,
                     const unsigned int nb_threads, const ws_type wstreamer_type,
                                        const bool quiet, const bool profiling) {
     int i;
-    Mapreduce *mr = mr_common_create(file_path, nb_threads, TYPE_PARALLEL,
+    Mapreduce *mr = _mr_common_create(file_path, nb_threads, MR_PARALLEL,
                                                               quiet, profiling);
     /* Set function pointers */
     mr->map = mr_parallel_map;
