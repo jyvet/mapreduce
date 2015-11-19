@@ -20,7 +20,7 @@ Building MapReduce
 
 Building and running unit tests
 -------------------------------
-    % mkdir -p build && cd build && cmake -D BUILD_TESTS:BOOL=TRUE .. && make 
+    % mkdir -p build && cd build && cmake -D BUILD_TESTS:BOOL=TRUE .. && make
 
 After building MapReduce, test it using:
 
@@ -30,7 +30,7 @@ After building MapReduce, test it using:
 Running MapReduce
 -----------------
 
-    % bin/mapred [OPTION...] <file> <Nthreads> 
+    % bin/mapred [OPTION...] <file> <Nthreads>
 
 
 * **file:** path to a file containing words
@@ -104,7 +104,7 @@ Benchmark
 
 Tests are performed with an *Intel i5-3427U CPU* @ 1.80GHz (4 SMT, 2 cores) and a SSD *Kingston SSDNow mS200* as a support storage for a 100MB source file. Best performances are obtained wih the scatter mode.
 
-    % ./mapred lorem_verylarge.txt 4 -w 0 -q -p
+    % ./mapred lorem_verylarge.txt 4 -q -p
     |-[WordStreamer 0] get: 844.262 ms
     |-[Dictionary] hash function: 151.677 ms
     |-[Dictionary] put: 2508.536 ms
