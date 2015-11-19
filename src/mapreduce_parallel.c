@@ -32,23 +32,23 @@
  * @return  A Mapreduce structure
  */
 Mapreduce* mr_parallel_create(const char *file_path,
-                               const unsigned int nb_threads, const int ws_type,
+                    const unsigned int nb_threads, const ws_type wstreamer_type,
                                        const bool quiet, const bool profiling) {
     int i;
     Mapreduce *mr = mr_common_create(file_path, nb_threads, TYPE_PARALLEL,
                                                               quiet, profiling);
-
+    /* Set function pointers */
     mr->map = mr_parallel_map;
     mr->reduce = mr_parallel_reduce;
     mr->delete = mr_parallel_delete;
 
     Mapreduce_parallel_thread *threads =
-                         malloc(nb_threads*sizeof(Mapreduce_parallel_thread));
+                           malloc(nb_threads*sizeof(Mapreduce_parallel_thread));
     mr->ext = threads;
 
     /* First thread */
     threads[0].wordstreamer = mr_wordstreamer_create_first(file_path,
-                                                nb_threads, ws_type, profiling);
+                                         nb_threads, wstreamer_type, profiling);
     threads[0].dictionary = mr_dictionary_create(profiling);
     threads[0].thread = malloc(sizeof(pthread_t));
     assert(threads[0].thread != NULL);
@@ -75,6 +75,7 @@ void mr_parallel_delete(Mapreduce *mr) {
     if (mr != NULL) {
         int i;
         Mapreduce_parallel_thread *threads = (Mapreduce_parallel_thread *) mr->ext;
+
         int nb_threads =  mr->nb_threads;
 
         for(i=0; i<nb_threads; i++) {

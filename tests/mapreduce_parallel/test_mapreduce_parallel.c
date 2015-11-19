@@ -33,8 +33,7 @@ START_TEST (test_create_delete)
     char *content = "content tests";
     create_file(filename, content);
 
-    Mapreduce *mr = mr_parallel_create(filename, 1, TYPE_WORDSTREAMER_SCATTER,
-                                                                   true, false);
+    Mapreduce *mr = mr_parallel_create(filename, 1, WS_SCHUNKS, true, false);
 
     ck_assert(mr != NULL);
 
@@ -74,8 +73,7 @@ START_TEST (test_multiple_mapreduce)
     /* Check several streamers combination */
 
     for (int i=1; i<=MAX_THREADS; i++) {
-        Mapreduce *mr = mr_parallel_create(filename, i,
-                                        TYPE_WORDSTREAMER_SCATTER, true, false);
+        Mapreduce *mr = mr_parallel_create(filename, i,WS_SCHUNKS, true, false);
 
         ck_assert(mr != NULL);
 

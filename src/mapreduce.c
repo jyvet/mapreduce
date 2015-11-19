@@ -37,17 +37,19 @@ void _stats_total(Mapreduce *);
  * @return  A Mapreduce structure
  */
 Mapreduce* _mr_create(const char *file_path, const int nb_threads,
-    const int type, const int ws_type, const bool quiet, const bool profiling) {
+                                   const int type, const ws_type wstreamer_type,
+                                       const bool quiet, const bool profiling) {
     Mapreduce *mr;
 
     switch(type) {
         default:
         case TYPE_PARALLEL :
-            mr = mr_parallel_create(file_path, nb_threads, ws_type,
+            mr = mr_parallel_create(file_path, nb_threads, wstreamer_type,
                                                               quiet, profiling);
             break;
         case TYPE_SEQUENTIAL :
-            mr = mr_sequential_create(file_path, ws_type, quiet, profiling);
+            mr = mr_sequential_create(file_path, wstreamer_type, quiet,
+                                                                     profiling);
             break;
     }
 
@@ -64,7 +66,7 @@ Mapreduce* _mr_create(const char *file_path, const int nb_threads,
 Mapreduce* mr_create(Arguments *args) {
     assert(args != NULL);
     return _mr_create(args->file_path, args->nb_threads, args->type,
-                                   args->ws_type, args->quiet, args->profiling);
+                            args->wstreamer_type, args->quiet, args->profiling);
 }
 
 

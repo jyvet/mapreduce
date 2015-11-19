@@ -17,14 +17,9 @@
  * @author Jean-Yves VET
  */
 
-#include <fcntl.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/mman.h>
-#include "tools.h"
 #include "wordstreamer.h"
-#include "wordstreamer_scatter.h"
-#include "wordstreamer_interleave.h"
+#include "wordstreamer_schunks.h"
+#include "wordstreamer_iwords.h"
 
 /* ========================= Constructor / Destructor ======================= */
 
@@ -38,17 +33,17 @@
  * @return  Pointer to the new Wordstreamer structure
  */
 Wordstreamer* mr_wordstreamer_create_first (const char* file_path,
-                       const int nb_streamers, const int type, bool profiling) {
+                   const int nb_streamers, const ws_type type, bool profiling) {
     Wordstreamer *ws;
 
     switch(type) {
         default:
-        case TYPE_WORDSTREAMER_INTERLEAVE :
-            ws = mr_wordstreamer_interleave_create_first(file_path,
+        case WS_IWORDS :
+            ws = mr_wordstreamer_iwords_create_first(file_path,
                                                        nb_streamers, profiling);
             break;
-        case TYPE_WORDSTREAMER_SCATTER :
-            ws = mr_wordstreamer_scatter_create_first(file_path, nb_streamers,
+        case WS_SCHUNKS :
+            ws = mr_wordstreamer_schunks_create_first(file_path, nb_streamers,
                                                                      profiling);
             break;
     }
@@ -64,28 +59,14 @@ Wordstreamer* mr_wordstreamer_create_first (const char* file_path,
  * @param   streamer_id[in]  Total number of streamers
  * @return  Pointer to the new Wordstreamer structure
  */
-Wordstreamer* mr_wordstreamer_create_another(Wordstreamer* first,
+Wordstreamer* mr_wordstreamer_create_another(const Wordstreamer* first,
                                                         const int streamer_id) {
-    Wordstreamer *ws;
-
-    unsigned int type = first->type;
-
-    switch(type) {
-        default:
-        case TYPE_WORDSTREAMER_INTERLEAVE :
-            ws = mr_wordstreamer_interleave_create_another(first, streamer_id);
-            break;
-        case TYPE_WORDSTREAMER_SCATTER :
-            ws = mr_wordstreamer_scatter_create_another(first, streamer_id);
-            break;
-    }
-
-    return ws;
+    return first->create_another(first, streamer_id);
 }
 
 
 /**
- * Delete a Wordstreamer structure.
+ * Delete a Wordstreamer structure and set pointer to NULL.
  *
  * @param   ws_ptr[in]   Pointer to pointer of a Wordstreamer structure
  */
@@ -101,84 +82,6 @@ void mr_wordstreamer_delete(Wordstreamer **ws_ptr) {
 
 
 /* ============================= Public functions =========================== */
-
-/**
- * Common constructor for implementations of Wordstreamer.
- *
- * @param   file_path[in]     String containing the path to the file to read
- * @param   shared_map[in]    Pointer to area where the file was mmaped
- * @param   streamer_id[in]   Id of the current wordstreamer
- * @param   nb_streamers[in]  Total number of streamers
- * @param   profiling[in]     Activate the profiling mode
- * @return  Pointer to the new Wordstreamer structure
- */
-Wordstreamer* _mr_wordstreamer_common_create(
-                 const char *file_path, char *shared_map, const int streamer_id,
-                                       const int nb_streamers, bool profiling) {
-    assert(nb_streamers != 0
-           && streamer_id < nb_streamers);
-
-    Wordstreamer *ws = malloc(sizeof(Wordstreamer));
-    assert(ws != NULL);
-
-    ws->profiling = profiling;
-    _timer_init(&ws->timer_get, ws->profiling);
-
-    ws->streamer_id = streamer_id;
-    ws->end = false;
-    ws->nb_streamers = nb_streamers;
-
-    /* If streamer_id = 0, open file and map it to memory */
-    if (!streamer_id) {
-        ws->file_size = mr_tools_fsize(file_path);
-        assert(file_path != NULL);
-        ws->fd = open(file_path, O_RDONLY | O_NONBLOCK);
-        assert(ws->fd >= 0);
-
-        /* Map file to memory to make accesses from multiple threads easier */
-        ws->shared_map = mmap(NULL, ws->file_size, PROT_READ,
-                                        MAP_PRIVATE | MAP_POPULATE,  ws->fd, 0);
-        assert(ws->shared_map != MAP_FAILED);
-
-        /* Advise the kernel we need to read completely the mapped file in
-           sequential order */
-        madvise(ws->shared_map, ws->file_size, MADV_SEQUENTIAL | MADV_WILLNEED);
-    } else {
-        assert(shared_map != NULL);
-        ws->shared_map = shared_map;
-    }
-
-    return ws;
-}
-
-
-/**
- * Common destructor for implementations of Wordstreamer.
- *
- * @param   ws[inout]     Pointer to the Wordstreamer structure
- */
-void _mr_wordstreamer_common_delete(Wordstreamer *ws) {
-    assert(ws != NULL);
-
-    /* Display profile with stream id if requiered */
-    char str[32];
-    char str_buf[32];
-    sprintf(str_buf, "%d", ws->streamer_id);
-    strcpy(str, "[WordStreamer ");
-    strcat(str, str_buf);
-    strcat(str, "] get");
-    _timer_print(&ws->timer_get, str);
-
-    /* Close file */
-    if (ws->streamer_id == 0) {
-        assert(ws->shared_map != NULL);
-        munmap(ws->shared_map, ws->chunk_size);
-    }
-
-    /* Free root structure */
-    free(ws);
-}
-
 
 /**
  * Get next word from a wordstreamer. Return 1 if end of stream reached.

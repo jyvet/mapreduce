@@ -13,18 +13,18 @@
 * KIND, either express or implied.
 ***************************************************************************/
 
-#ifndef HEADER_MAPREDUCE_WORDSTREAMER_INTERLEAVE_H
-    #define HEADER_MAPREDUCE_WORDSTREAMER_INTERLEAVE_H
+#ifndef HEADER_MAPREDUCE_WORDSTREAMER_IWORDS_H
+    #define HEADER_MAPREDUCE_WORDSTREAMER_IWORDS_H
 
     #include "wordstreamer.h"
 
     /* ============================== Prototypes ============================ */
 
-    Wordstreamer*  mr_wordstreamer_interleave_create_first(const char*,
+    Wordstreamer*  mr_wordstreamer_iwords_create_first(const char*,
                                                                const int, bool);
-    Wordstreamer*  mr_wordstreamer_interleave_create_another(Wordstreamer*,
+    Wordstreamer*  mr_wordstreamer_iwords_create_another(const Wordstreamer*,
                                                                      const int);
-    void           mr_wordstreamer_interleave_delete(Wordstreamer*);
+    void           mr_wordstreamer_iwords_delete(Wordstreamer*);
 
-    int            mr_wordstreamer_interleave_get(Wordstreamer*, char*);
+    int            mr_wordstreamer_iwords_get(Wordstreamer*, char*);
 #endif

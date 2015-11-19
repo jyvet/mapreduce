@@ -14,13 +14,13 @@
 /**
  * @file wordstreamer_interleave.c
  * @brief Streamer to retrieve words from a file. With multiple streams, file is
-          accessed in an interleaved fashion.
+          accessed in words interleaved fashion.
  * @author Jean-Yves VET
  */
 
-#include "wordstreamer_interleave.h"
+#include "wordstreamer_iwords.h"
 
-Wordstreamer* _mr_wordstreamer_interleave_create(const char*, char *, const int,
+Wordstreamer* _mr_wordstreamer_iwords_create(const char*, char *, const int,
                                                          const int, const bool);
 
 /* ========================= Constructor / Destructor ======================= */
@@ -33,15 +33,11 @@ Wordstreamer* _mr_wordstreamer_interleave_create(const char*, char *, const int,
  * @param   profiling[in]     Activate the profiling mode
  * @return  Pointer to the new Wordstreamer structure
  */
-Wordstreamer* mr_wordstreamer_interleave_create_first(const char* file_path,
+Wordstreamer* mr_wordstreamer_iwords_create_first(const char* file_path,
                                        const int nb_streamers, bool profiling) {
-    Wordstreamer* ws = _mr_wordstreamer_interleave_create(file_path, NULL, 0,
+
+    return _mr_wordstreamer_iwords_create(file_path, NULL, 0,
                                                        nb_streamers, profiling);
-
-    ws->chunk_size = ws->file_size;
-    ws->stop_offset = ws->file_size-1;
-
-    return ws;
 }
 
 
@@ -52,18 +48,11 @@ Wordstreamer* mr_wordstreamer_interleave_create_first(const char* file_path,
  * @param   streamer_id[in]  Total number of streamers
  * @return  Pointer to the new Wordstreamer structure
  */
-Wordstreamer* mr_wordstreamer_interleave_create_another(Wordstreamer* first,
+Wordstreamer* mr_wordstreamer_iwords_create_another(const Wordstreamer* first,
                                                         const int streamer_id) {
 
-    Wordstreamer* ws = _mr_wordstreamer_interleave_create("", first->shared_map,
+    return _mr_wordstreamer_iwords_create(first->file_path, first->shared_map,
                             streamer_id, first->nb_streamers, first->profiling);
-
-    ws->file_size = first->file_size;
-
-    ws->chunk_size = ws->file_size;
-    ws->stop_offset = ws->file_size-1;
-
-    return ws;
 }
 
 
@@ -72,7 +61,7 @@ Wordstreamer* mr_wordstreamer_interleave_create_another(Wordstreamer* first,
  *
  * @param   ws_ptr[in]   Pointer to the Wordstreamer structure
  */
-void  mr_wordstreamer_interleave_delete(Wordstreamer* ws) {
+void  mr_wordstreamer_iwords_delete(Wordstreamer* ws) {
     _mr_wordstreamer_common_delete(ws);
 }
 
@@ -89,20 +78,23 @@ void  mr_wordstreamer_interleave_delete(Wordstreamer* ws) {
  * @param   profiling[in]     Activate the profiling mode
  * @return  Pointer to the new Wordstreamer structure
  */
-Wordstreamer* _mr_wordstreamer_interleave_create(
+Wordstreamer* _mr_wordstreamer_iwords_create(
           const char* file_path, char *shared_map,
           const int streamer_id, const int nb_streamers, const bool profiling) {
 
     Wordstreamer *ws =  _mr_wordstreamer_common_create(file_path, shared_map,
                                           streamer_id, nb_streamers, profiling);
 
-    ws->get = mr_wordstreamer_interleave_get;
-    ws->delete = mr_wordstreamer_interleave_delete;
+    /* Set function pointers */
+    ws->get = mr_wordstreamer_iwords_get;
+    ws->delete = mr_wordstreamer_iwords_delete;
+    ws->create_another = mr_wordstreamer_iwords_create_another;
 
-    ws->type = TYPE_WORDSTREAMER_INTERLEAVE;
-
+    /* Set offsets and chunk elements */
     ws->start_offset = 0;
     ws->offset = 0;
+    ws->chunk_size = ws->file_size;
+    ws->stop_offset = ws->file_size - 1;
 
     return ws;
 }
@@ -117,7 +109,7 @@ Wordstreamer* _mr_wordstreamer_interleave_create(
  * @param   streamer_id[in]    Id of the current wordstreamer
  * @param   shared_map[in]     Pointer to area where the file was mmaped
  */
-static inline void _mr_wordstreamer_interleave_remove_nonwords(Wordstreamer *ws,
+static inline void _mr_wordstreamer_iwords_remove_nonwords(Wordstreamer *ws,
                                                              char *shared_map) {
     long int offset = ws->offset;
     char character = shared_map[offset];
@@ -140,7 +132,7 @@ static inline void _mr_wordstreamer_interleave_remove_nonwords(Wordstreamer *ws,
  * @param   streamer_id[in]    Id of the current wordstreamer
  * @param   shared_map[in]     Pointer to area where the file was mmaped
  */
-static inline void _mr_wordstreamer_interleave_retrieve_word(Wordstreamer *ws,
+static inline void _mr_wordstreamer_iwords_retrieve_word(Wordstreamer *ws,
                            long int file_size, char *buffer, char *shared_map) {
     long int offset = ws->offset;
     char character = shared_map[offset];
@@ -172,14 +164,12 @@ static inline void _mr_wordstreamer_interleave_retrieve_word(Wordstreamer *ws,
  * @return  0 if a word was copied into the buffer or 1 if the end of the stream
  *          was reached
  */
-int mr_wordstreamer_interleave_get(Wordstreamer *ws, char *buffer) {
+int mr_wordstreamer_iwords_get(Wordstreamer *ws, char *buffer) {
     _timer_start(&ws->timer_get);
     char word[MAPREDUCE_MAX_WORD_SIZE];
-    int nb_streamers = ws->nb_streamers;
-    int streamer_id = ws->streamer_id;
+    int nb_streamers = ws->nb_streamers, streamer_id = ws->streamer_id;
     char* map = ws->shared_map;
     long int offset, file_size = ws->file_size, stop_offset = ws->stop_offset;
-
     int word_count = 0;
 
     /* Return because end of stream already reached */
@@ -188,12 +178,12 @@ int mr_wordstreamer_interleave_get(Wordstreamer *ws, char *buffer) {
     /* Find the next word associated with the streamer id */
     while (word_count < nb_streamers && ws->offset <= stop_offset) {
         /* Remove incomplete words, spaces and punctuation */
-        _mr_wordstreamer_interleave_remove_nonwords(ws, map);
+        _mr_wordstreamer_iwords_remove_nonwords(ws, map);
         offset = ws->offset;
 
         if (offset < stop_offset) {
             /* Retrieve a complete word */
-            _mr_wordstreamer_interleave_retrieve_word(ws, file_size, word, map);
+            _mr_wordstreamer_iwords_retrieve_word(ws, file_size, word, map);
 
             if (word_count == streamer_id) {
                 strcpy(buffer, word);

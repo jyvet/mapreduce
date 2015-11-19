@@ -32,8 +32,7 @@ START_TEST (test_create_delete)
     char *content = "content tests";
     create_file(filename, content);
 
-    Mapreduce *mr = mr_sequential_create(filename, TYPE_WORDSTREAMER_SCATTER,
-                                                                   true, false);
+    Mapreduce *mr = mr_sequential_create(filename, WS_SCHUNKS, true, false);
 
     ck_assert(mr != NULL);
 
@@ -70,9 +69,8 @@ START_TEST (test_mapreduce)
 
     create_file(filename, content);
 
-    Mapreduce *mr = mr_sequential_create(filename, TYPE_WORDSTREAMER_SCATTER,
-                                                                   true, false);
-    ck_assert(mr != NULL);
+    Mapreduce *mr = mr_sequential_create(filename, WS_SCHUNKS, true, false);
+    ck_assert_ptr_ne(mr, NULL);
 
     ck_assert(mr->ext != NULL);
     Mapreduce_sequential_ext *ext = (Mapreduce_sequential_ext *) mr->ext;

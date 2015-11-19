@@ -30,18 +30,18 @@
  * @param  profiling[in]    Activate the profiling mode
  * @return  A Mapreduce structure
  */
-Mapreduce* mr_sequential_create(const char *file_path, const int ws_type,
-                                       const bool quiet, const bool profiling) {
+Mapreduce* mr_sequential_create(const char *file_path,
+         const ws_type wstreamer_type, const bool quiet, const bool profiling) {
     Mapreduce *mr = mr_common_create(file_path, 1, TYPE_SEQUENTIAL,
                                                               quiet, profiling);
-
+    /* Set function pointers */
     mr->map = mr_sequential_map;
     mr->reduce = mr_sequential_reduce;
     mr->delete = mr_sequential_delete;
 
     Mapreduce_sequential_ext *ext = malloc(sizeof(Mapreduce_sequential_ext));
     ext->wordstreamer = mr_wordstreamer_create_first(file_path, 1,
-                                                            ws_type, profiling);
+                                                     wstreamer_type, profiling);
     ext->dictionary = mr_dictionary_create(profiling);
 
     mr->ext = ext;

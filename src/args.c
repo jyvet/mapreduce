@@ -40,7 +40,8 @@ static struct argp_option options[] = {
     {"type",       't', "MR_TYPE", 0, "Mapreduce type "
                                       "(0=PARALLEL, 1=SEQUENTIAL)"},
     {"wtype",      'w', "WS_TYPE", 0, "WordStreamer type "
-                                      "(0=SCATTER, 1=INTERLEAVE)"},
+                                      "(0=SCATTERED CHUNKS,"
+                                      " 1=INTERLEAVED CHUNKS"},
     { 0 }
 };
 
@@ -65,9 +66,8 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
             break;
         case 'w':
             type = atoi(arg);
-            if (type == TYPE_WORDSTREAMER_SCATTER
-                || type == TYPE_WORDSTREAMER_INTERLEAVE) {
-                args->ws_type = type;
+            if (type < WS_NB) {
+                args->wstreamer_type = type;
             }
             break;
         case ARGP_KEY_ARG:
@@ -119,9 +119,9 @@ void _check_arguments(Arguments *args) {
     unsigned int nb_threads = args->nb_threads;
 
     if(nb_threads < MAPREDUCE_MIN_THREADS) {
-	mr_error(ERR_MINTHREADS);
+        mr_error(ERR_MINTHREADS);
     } else if (nb_threads > MAPREDUCE_MAX_THREADS) {
-	mr_error(ERR_MAXTHREADS);
+        mr_error(ERR_MAXTHREADS);
     }
 
     /* Check file access in read mode */
@@ -146,17 +146,17 @@ Arguments* mr_args_create(int argc, char **argv) {
     assert(args != NULL);
 
     /* Initialize options with default values */
-    args->quiet      =   MAPREDUCE_DEFAULT_QUIET;
-    args->profiling  =   MAPREDUCE_DEFAULT_PROFILING;
-    args->ws_type    =   MAPREDUCE_WS_DEFAULT_TYPE;
-    args->type       =   MAPREDUCE_DEFAULT_TYPE;
+    args->quiet            =   MAPREDUCE_DEFAULT_QUIET;
+    args->profiling        =   MAPREDUCE_DEFAULT_PROFILING;
+    args->wstreamer_type   =   MAPREDUCE_WS_DEFAULT_TYPE;
+    args->type             =   MAPREDUCE_DEFAULT_TYPE;
 
     return args;
 }
 
 
 /**
- * Delete an Arguments structure.
+ * Delete an Arguments structure and set pointer to NULL.
  *
  * @param   args_ptr[in]   Poiter to pointer of an Arguments structure
  */

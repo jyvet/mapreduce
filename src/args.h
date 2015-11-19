@@ -21,12 +21,12 @@
      * @brief  Structure which holds all provided arguments.
      */
     typedef struct arguments_s {
-        char*        file_path;    /**<  Path to the file to open             */
-        unsigned int nb_threads;   /**<  Number of threads to use             */
-        bool         profiling;    /**<  Profiling mode                       */
-        bool         quiet;        /**<  Display every details                */
-        int          ws_type;      /**<  Type of wordstreamer (see common.h)  */
-        int          type;         /**<  Type of mapreduce (see common.h)     */
+        char*        file_path;      /**<  Path to the file to open           */
+        unsigned int nb_threads;     /**<  Number of threads to use           */
+        bool         profiling;      /**<  Profiling mode                     */
+        bool         quiet;          /**<  Display every details              */
+        ws_type      wstreamer_type; /**<  Type of wordstreamer (see common.h)*/
+        int          type;           /**<  Type of mapreduce (see common.h)   */
     } Arguments;
 
 

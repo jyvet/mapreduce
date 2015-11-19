@@ -42,7 +42,7 @@
     Mapreduce*   mr_common_create(const char *, const int, const int,
                                                         const bool, const bool);
     Mapreduce*   mr_create(Arguments*);
-    Mapreduce*   _mr_create(const char*, const int, const int, const int,
+    Mapreduce*   _mr_create(const char*, const int, const int, const ws_type,
                                                         const bool, const bool);
     void         mr_delete(Mapreduce**);
     void         mr_map(Mapreduce*);
