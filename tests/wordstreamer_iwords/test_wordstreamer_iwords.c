@@ -34,7 +34,7 @@ START_TEST (test_create_delete)
     create_file(filename, content);
 
     Wordstreamer *ws = mr_wordstreamer_iwords_create_first(filename, 1, false);
-    ck_assert_ptr_ne(ws, NULL);
+    ck_assert(ws != NULL);
 
     ck_assert_int_eq(ws->nb_streamers, 1);
     ck_assert_int_eq(ws->streamer_id, 0);
@@ -57,7 +57,7 @@ START_TEST (test_singlestreamer_get)
     create_file(filename, content);
 
     Wordstreamer *ws = mr_wordstreamer_iwords_create_first(filename, 1, false);
-    ck_assert_ptr_ne(ws, NULL);
+    ck_assert(ws != NULL);
 
     char buffer[32];
     int ret;
@@ -117,7 +117,7 @@ START_TEST (test_multiplestreamer_get)
     /* Sequential streamer as a reference */
     Wordstreamer *ws_ref = mr_wordstreamer_iwords_create_first(filename, 1,
                                                                          false);
-    ck_assert_ptr_ne(ws_ref, NULL);
+    ck_assert(ws_ref != NULL);
     char ref[4096];
     char word[128];
 
@@ -140,11 +140,11 @@ START_TEST (test_multiplestreamer_get)
         /* Create streamers */
         Wordstreamer **ws = malloc(sizeof(Wordstreamer)*i);
         ws[0] = mr_wordstreamer_iwords_create_first(filename, i, false);
-        ck_assert_ptr_ne(ws[0], NULL);
+        ck_assert(ws[0] != NULL);
 
         for(int s=1; s<i; s++) {
             ws[s] = mr_wordstreamer_iwords_create_another(ws[0], s);
-            ck_assert_ptr_ne(ws[s], NULL);
+            ck_assert(ws[s] != NULL);
         }
 
         /* Retrieve words */

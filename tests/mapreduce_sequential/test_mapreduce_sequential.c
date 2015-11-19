@@ -70,7 +70,7 @@ START_TEST (test_mapreduce)
     create_file(filename, content);
 
     Mapreduce *mr = mr_sequential_create(filename, WS_SCHUNKS, true, false);
-    ck_assert_ptr_ne(mr, NULL);
+    ck_assert(mr != NULL);
 
     ck_assert(mr->ext != NULL);
     Mapreduce_sequential_ext *ext = (Mapreduce_sequential_ext *) mr->ext;
