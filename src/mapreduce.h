@@ -26,7 +26,7 @@
         void          (*reduce)();  /**<  Pointer to impl. of reduce function */
         void          (*delete)();  /**<  Pointer to impl. of delete function */
         char*         file_path;    /**<  Path to the file to open            */
-        int           type;         /**<  Type of mapreduce (see common.h)    */
+        mr_type       type;         /**<  Type of mapreduce (see common.h)    */
         bool          quiet;        /**<  Display every details               */
         bool          profiling;    /**<  Profiling mode                      */
         unsigned int  nb_threads;   /**<  Number of thread worker used        */
@@ -37,14 +37,45 @@
     } Mapreduce;
 
 
+    /* =========================== Static Elements ========================== */
+
+    /**
+     * Common constructor for implementations of Mapreduce.
+     *
+     * @param   file_path[in]     String containing the path to the file to read
+     * @param   nb_threads[in]    Total number of threads
+     * @param   type[in]          Type of mapreduce (see common.h)
+     * @param   quiet[in]         Activate the quiet mode (no output)
+     * @param   profiling[in]     Activate the profiling mode
+     * @return  Pointer to the new Wordstreamer structure
+     */
+    static inline Mapreduce* _mr_common_create(const char *file_path,
+                                       const int nb_threads, const mr_type type,
+                                       const bool quiet, const bool profiling) {
+
+        Mapreduce *mr = malloc(sizeof(Mapreduce));
+
+        mr->file_path = malloc(strlen(file_path)+1);
+        strcpy(mr->file_path, file_path);
+        mr->nb_threads = nb_threads;
+        mr->type = type;
+        mr->quiet = quiet;
+        mr->profiling = profiling;
+
+        _timer_init(&mr->timer_map, profiling);
+        _timer_init(&mr->timer_reduce, profiling);
+        _timer_init(&mr->timer_global, profiling);
+        _timer_start(&mr->timer_global);
+
+        return mr;
+    }
+
+
     /* ============================== Prototypes ============================ */
 
-    Mapreduce*   mr_common_create(const char *, const int, const int,
-                                                        const bool, const bool);
     Mapreduce*   mr_create(Arguments*);
-    Mapreduce*   _mr_create(const char*, const int, const int, const int,
-                                                        const bool, const bool);
     void         mr_delete(Mapreduce**);
+
     void         mr_map(Mapreduce*);
     void         mr_reduce(Mapreduce*);
 #endif

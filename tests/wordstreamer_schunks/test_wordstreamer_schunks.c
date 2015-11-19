@@ -11,7 +11,7 @@
 * KIND, either express or implied.                                             *
 *******************************************************************************/
 
-#include "wordstreamer_scatter.h"
+#include "wordstreamer_schunks.h"
 #include <check.h>
 
 #define MAX_STREAMERS 11
@@ -33,7 +33,7 @@ START_TEST (test_create_delete)
     char *content = "content tests";
     create_file(filename, content);
 
-    Wordstreamer *ws = mr_wordstreamer_scatter_create_first(filename, 1, false);
+    Wordstreamer *ws = mr_wordstreamer_schunks_create_first(filename, 1, false);
     ck_assert(ws != NULL);
 
     ck_assert_int_eq(ws->nb_streamers, 1);
@@ -41,7 +41,7 @@ START_TEST (test_create_delete)
     ck_assert_int_eq(ws->start_offset, 0);
     ck_assert_int_eq(ws->profiling, 0);
 
-    mr_wordstreamer_scatter_delete(ws);
+    mr_wordstreamer_schunks_delete(ws);
 
     /* Delete testfile */
     remove(filename);
@@ -56,31 +56,32 @@ START_TEST (test_singlestreamer_get)
     char *content = ".Donec!, ut  libero sed. ";
     create_file(filename, content);
 
-    Wordstreamer *ws = mr_wordstreamer_scatter_create_first(filename, 1, false);
+    Wordstreamer *ws = mr_wordstreamer_schunks_create_first(filename, 1, false);
+    ck_assert(ws != NULL);
 
     char buffer[32];
     int ret;
 
-    ret = mr_wordstreamer_scatter_get(ws, buffer);
+    ret = mr_wordstreamer_schunks_get(ws, buffer);
     ck_assert_int_eq(ret, 0);
     ck_assert_str_eq(buffer, "donec");
 
-    ret = mr_wordstreamer_scatter_get(ws, buffer);
+    ret = mr_wordstreamer_schunks_get(ws, buffer);
     ck_assert_int_eq(ret, 0);
     ck_assert_str_eq(buffer, "ut");
 
-    ret = mr_wordstreamer_scatter_get(ws, buffer);
+    ret = mr_wordstreamer_schunks_get(ws, buffer);
     ck_assert_int_eq(ret, 0);
     ck_assert_str_eq(buffer, "libero");
 
-    ret = mr_wordstreamer_scatter_get(ws, buffer);
+    ret = mr_wordstreamer_schunks_get(ws, buffer);
     ck_assert_int_eq(ret, 0);
     ck_assert_str_eq(buffer, "sed");
 
-    ret = mr_wordstreamer_scatter_get(ws, buffer);
+    ret = mr_wordstreamer_schunks_get(ws, buffer);
     ck_assert_int_eq(ret, 1);
 
-    mr_wordstreamer_scatter_delete(ws);
+    mr_wordstreamer_schunks_delete(ws);
 
     /* Delete testfile */
     remove(filename);
@@ -90,6 +91,7 @@ END_TEST
 
 START_TEST (test_multiplestreamer_get)
 {
+    int i;
     /* Create test file */
     char *filename = "ws_test.txt";
     char *content = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. "
@@ -114,46 +116,50 @@ START_TEST (test_multiplestreamer_get)
     create_file(filename, content);
 
     /* Sequential streamer as a reference */
-    Wordstreamer *ws = mr_wordstreamer_scatter_create_first(filename, 1, false);
+    Wordstreamer *ws = mr_wordstreamer_schunks_create_first(filename, 1, false);
+    ck_assert(ws != NULL);
+
     char ref[4096];
     char word[128];
 
-    if (!mr_wordstreamer_scatter_get(ws, word)) strcpy(ref, word);
+    if (!mr_wordstreamer_schunks_get(ws, word)) strcpy(ref, word);
 
-    while (!mr_wordstreamer_scatter_get(ws, word)) {
+    while (!mr_wordstreamer_schunks_get(ws, word)) {
         strcat(ref, " ");
         strcat(ref, word);
     }
 
-    mr_wordstreamer_scatter_delete(ws);
-
+    mr_wordstreamer_schunks_delete(ws);
 
     /* Check several streamers combination */
-    for (int i=2; i<=MAX_STREAMERS; i++) {
+    for (i=2; i<=MAX_STREAMERS; i++) {
+        int s;
         char comp[4096];
-        Wordstreamer *first_ws = mr_wordstreamer_scatter_create_first(filename,
+        Wordstreamer *first_ws = mr_wordstreamer_schunks_create_first(filename,
                                                                       i, false);
+        ck_assert(first_ws != NULL);
 
-        if (!mr_wordstreamer_scatter_get(first_ws, word)) strcpy(comp, word);
+        if (!mr_wordstreamer_schunks_get(first_ws, word)) strcpy(comp, word);
 
-        while (!mr_wordstreamer_scatter_get(first_ws, word)) {
+        while (!mr_wordstreamer_schunks_get(first_ws, word)) {
             strcat(comp, " ");
             strcat(comp, word);
         }
 
-        for(int s=1; s<i; s++) {
+        for(s=1; s<i; s++) {
             Wordstreamer *another_ws =
-                            mr_wordstreamer_scatter_create_another(first_ws, s);
+                            mr_wordstreamer_schunks_create_another(first_ws, s);
+            ck_assert(another_ws != NULL);
 
-            while (!mr_wordstreamer_scatter_get(another_ws, word)) {
+            while (!mr_wordstreamer_schunks_get(another_ws, word)) {
                 strcat(comp, " ");
                 strcat(comp, word);
             }
 
-            mr_wordstreamer_scatter_delete(another_ws);
+            mr_wordstreamer_schunks_delete(another_ws);
         }
 
-        mr_wordstreamer_scatter_delete(first_ws);
+        mr_wordstreamer_schunks_delete(first_ws);
 
         ck_assert_str_eq(comp, ref);
     }
@@ -163,8 +169,8 @@ START_TEST (test_multiplestreamer_get)
 END_TEST
 
 
-Suite *wordstreamer_scatter_suite(void) {
-    Suite *suite = suite_create("Wordstreamer Scatter");
+Suite *wordstreamer_schunks_suite(void) {
+    Suite *suite = suite_create("Wordstreamer Scattered Chunks");
     TCase *tcase1 = tcase_create("Case Create Delete");
     TCase *tcase2 = tcase_create("Case Single streamer Get");
     TCase *tcase3 = tcase_create("Case mutiple streamers Get");
@@ -183,7 +189,7 @@ Suite *wordstreamer_scatter_suite(void) {
 
 int main(void) {
     int number_failed;
-    Suite *suite = wordstreamer_scatter_suite();
+    Suite *suite = wordstreamer_schunks_suite();
     SRunner *runner = srunner_create(suite);
 
     srunner_run_all(runner, CK_NORMAL);

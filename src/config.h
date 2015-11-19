@@ -16,8 +16,9 @@
 
     #include "common.h"
 
-    #define MAPREDUCE_DEFAULT_TYPE            TYPE_PARALLEL
-    #define MAPREDUCE_WS_DEFAULT_TYPE         TYPE_WORDSTREAMER_SCATTER
+    #define MAPREDUCE_DEFAULT_TYPE            MR_PARALLEL
+    #define MAPREDUCE_WS_DEFAULT_TYPE         WS_SCHUNKS
+    #define MAPREDUCE_WS_DEFAULT_CHUNK_SIZE   16
     #define MAPREDUCE_DEFAULT_USECOLORS       1
     #define MAPREDUCE_DEFAULT_QUIET           0
     #define MAPREDUCE_DEFAULT_PROFILING       0
@@ -26,6 +27,6 @@
     #define MAPREDUCE_USE_BUFFALLOC           1
     #define MAPREDUCE_BUFFALLOC_CHUNK_SIZE    1024
     #define MAPREDUCE_MAX_WORD_SIZE           (MAPREDUCE_BUFFALLOC_CHUNK_SIZE-1)
-    #define MAPREDUCE_VERSION                 "0.2"
+    #define MAPREDUCE_VERSION                 "0.4"
     #define MAPREDUCE_CONTACT                 "contact [at] jean-yves [dot] vet"
 #endif

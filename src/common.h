@@ -14,10 +14,17 @@
 #ifndef HEADER_MAPREDUCE_COMMON_H
     #define HEADER_MAPREDUCE_COMMON_H
 
-    #define TYPE_PARALLEL                    0
-    #define TYPE_SEQUENTIAL                  1
-    #define TYPE_WORDSTREAMER_SCATTER        0
-    #define TYPE_WORDSTREAMER_INTERLEAVE     1
+    typedef enum {
+        WS_SCHUNKS,         /* Wordstreamer type: scattered chunks   */
+        WS_IWORDS,          /* Wordstreamer type: interleaved words  */
+        WS_NB               /* Number of Wordstreamer types          */
+    } ws_type;
+
+    typedef enum {
+        MR_PARALLEL,         /* Mapreduce type: parallel (pthreads)   */
+        MR_SEQUENTIAL,       /* Mapreduce type: sequential            */
+        MR_NB                /* Number of Mapreduce types             */
+    } mr_type;
 
     #include <stdint.h>
     #include <stdio.h>

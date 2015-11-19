@@ -12,15 +12,15 @@
 *******************************************************************************/
 
 /**
- * @file wordstreamer_scatter.c
+ * @file wordstreamer_schunks.c
  * @brief Streamer to retrieve words from a file. With multiple streams, file is
-          accessed via multiple chunks where data do not overlap.
+          accessed via multiple scattered chunks where data do not overlap.
  * @author Jean-Yves VET
  */
 
-#include "wordstreamer_scatter.h"
+#include "wordstreamer_schunks.h"
 
-Wordstreamer* _mr_wordstreamer_scatter_create(const char*, char *, const int,
+Wordstreamer* _mr_wordstreamer_schunks_create(const char*, char *, const int,
                                                          const int, const bool);
 
 /* ========================= Constructor / Destructor ======================= */
@@ -33,17 +33,11 @@ Wordstreamer* _mr_wordstreamer_scatter_create(const char*, char *, const int,
  * @param   profiling[in]     Activate the profiling mode
  * @return  Pointer to the new Wordstreamer structure
  */
-Wordstreamer* mr_wordstreamer_scatter_create_first(const char* file_path,
+Wordstreamer* mr_wordstreamer_schunks_create_first(const char* file_path,
                                        const int nb_streamers, bool profiling) {
-    Wordstreamer* ws = _mr_wordstreamer_scatter_create(file_path, NULL, 0,
+
+    return _mr_wordstreamer_schunks_create(file_path, NULL, 0,
                                                        nb_streamers, profiling);
-
-    ws->chunk_size = ws->file_size/nb_streamers;
-    ws->start_offset = 0;
-    ws->offset = ws->start_offset;
-    ws->stop_offset = ws->start_offset+ws->chunk_size;
-
-    return ws;
 }
 
 
@@ -54,26 +48,11 @@ Wordstreamer* mr_wordstreamer_scatter_create_first(const char* file_path,
  * @param   streamer_id[in]  Total number of streamers
  * @return  Pointer to the new Wordstreamer structure
  */
-Wordstreamer* mr_wordstreamer_scatter_create_another(Wordstreamer* first,
+Wordstreamer* mr_wordstreamer_schunks_create_another(const Wordstreamer* first,
                                                         const int streamer_id) {
 
-    Wordstreamer* ws = _mr_wordstreamer_scatter_create("", first->shared_map,
-                            streamer_id, first->nb_streamers, first->profiling);
-
-    unsigned int file_size = first->file_size;
-    unsigned int nb_streamers = first->nb_streamers;
-
-    ws->file_size = file_size;
-
-    ws->chunk_size = file_size/nb_streamers;
-    ws->start_offset = ws->chunk_size*streamer_id;
-    ws->offset = ws->start_offset;
-    if (streamer_id == nb_streamers -1) {
-        ws->chunk_size += ws->file_size%nb_streamers;
-    }
-    ws->stop_offset = ws->start_offset+ws->chunk_size;
-
-    return ws;
+    return _mr_wordstreamer_schunks_create(first->file_path,
+         first->shared_map, streamer_id, first->nb_streamers, first->profiling);
 }
 
 
@@ -82,7 +61,7 @@ Wordstreamer* mr_wordstreamer_scatter_create_another(Wordstreamer* first,
  *
  * @param   ws_ptr[in]   Pointer to the Wordstreamer structure
  */
-void  mr_wordstreamer_scatter_delete(Wordstreamer* ws) {
+void  mr_wordstreamer_schunks_delete(Wordstreamer* ws) {
     _mr_wordstreamer_common_delete(ws);
 }
 
@@ -90,7 +69,7 @@ void  mr_wordstreamer_scatter_delete(Wordstreamer* ws) {
 /* ============================= Private functions ========================== */
 
 /**
- * Internal constructor for Wordstreamer_scatter.
+ * Internal constructor for Wordstreamer_schunks.
  *
  * @param   file_path[in]     String containing the path to the file to read
  * @param   shared_map[in]    Pointer to area where the file was mmaped
@@ -99,17 +78,27 @@ void  mr_wordstreamer_scatter_delete(Wordstreamer* ws) {
  * @param   profiling[in]     Activate the profiling mode
  * @return  Pointer to the new Wordstreamer structure
  */
-Wordstreamer* _mr_wordstreamer_scatter_create(
+Wordstreamer* _mr_wordstreamer_schunks_create(
           const char* file_path, char *shared_map,
           const int streamer_id, const int nb_streamers, const bool profiling) {
 
     Wordstreamer *ws =  _mr_wordstreamer_common_create(file_path, shared_map,
                                           streamer_id, nb_streamers, profiling);
 
-    ws->get = mr_wordstreamer_scatter_get;
-    ws->delete = mr_wordstreamer_scatter_delete;
+    /* Set function pointers */
+    ws->get = mr_wordstreamer_schunks_get;
+    ws->delete = mr_wordstreamer_schunks_delete;
+    ws->create_another = mr_wordstreamer_schunks_create_another;
 
-    ws->type = TYPE_WORDSTREAMER_SCATTER;
+    /* Set offsets and chunk elements */
+    ws->chunk_size = ws->file_size/nb_streamers;
+    ws->start_offset = ws->chunk_size*streamer_id;
+    ws->offset = ws->start_offset;
+
+    if (streamer_id == nb_streamers - 1) {
+        ws->chunk_size += ws->file_size%nb_streamers;
+    }
+    ws->stop_offset = ws->start_offset+ws->chunk_size;
 
     return ws;
 }
@@ -124,7 +113,7 @@ Wordstreamer* _mr_wordstreamer_scatter_create(
  * @param   streamer_id[in]    Id of the current wordstreamer
  * @param   shared_map[in]     Pointer to area where the file was mmaped
  */
-static inline void _mr_wordstreamer_remove_nonwords(Wordstreamer *ws,
+static inline void _mr_wordstreamer_schunks_remove_nonwords(Wordstreamer *ws,
                                     long int file_size, long int start_offset,
                                             int streamer_id, char *shared_map) {
     long int offset = ws->offset;
@@ -156,7 +145,7 @@ static inline void _mr_wordstreamer_remove_nonwords(Wordstreamer *ws,
  * @param   streamer_id[in]    Id of the current wordstreamer
  * @param   shared_map[in]     Pointer to area where the file was mmaped
  */
-static inline void _mr_wordstreamer_retrieve_word(Wordstreamer *ws,
+static inline void _mr_wordstreamer_schunks_retrieve_word(Wordstreamer *ws,
                            long int file_size, char *buffer, char *shared_map) {
     long int offset = ws->offset;
     char character = shared_map[offset];
@@ -188,7 +177,7 @@ static inline void _mr_wordstreamer_retrieve_word(Wordstreamer *ws,
  * @return  0 if a word was copied into the buffer or 1 if the end of the stream
  *          was reached
  */
-int mr_wordstreamer_scatter_get(Wordstreamer *ws, char *buffer) {
+int mr_wordstreamer_schunks_get(Wordstreamer *ws, char *buffer) {
     _timer_start(&ws->timer_get);
     int streamer_id = ws->streamer_id;
     char* map = ws->shared_map;
@@ -199,14 +188,14 @@ int mr_wordstreamer_scatter_get(Wordstreamer *ws, char *buffer) {
     if(ws->end) return 1;
 
     /* Remove incomplete words, spaces and punctuation */
-    _mr_wordstreamer_remove_nonwords(ws, file_size, start_offset,
+    _mr_wordstreamer_schunks_remove_nonwords(ws, file_size, start_offset,
                                                              streamer_id, map);
 
     offset = ws->offset;
 
     if (offset < stop_offset) {
         /* Retrieve a complete word */
-        _mr_wordstreamer_retrieve_word(ws, file_size, buffer, map);
+        _mr_wordstreamer_schunks_retrieve_word(ws, file_size, buffer, map);
 
         if (ws->offset > stop_offset) ws->end = true;
         _timer_stop(&ws->timer_get);
@@ -218,7 +207,7 @@ int mr_wordstreamer_scatter_get(Wordstreamer *ws, char *buffer) {
         /* Retrieve one more word (last word on two chunks) */
         if(offset== stop_offset && !ispunct(character) && !isspace(character) && offset < file_size) {
 
-            _mr_wordstreamer_retrieve_word(ws, file_size, buffer, map);
+            _mr_wordstreamer_schunks_retrieve_word(ws, file_size, buffer, map);
             ws->end = true;
             _timer_stop(&ws->timer_get);
 

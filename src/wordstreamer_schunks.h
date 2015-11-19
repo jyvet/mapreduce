@@ -13,18 +13,18 @@
 * KIND, either express or implied.
 ***************************************************************************/
 
-#ifndef HEADER_MAPREDUCE_WORDSTREAMER_SCATTER_H
-    #define HEADER_MAPREDUCE_WORDSTREAMER_SCATTER_H
+#ifndef HEADER_MAPREDUCE_WORDSTREAMER_SCHUNKS_H
+    #define HEADER_MAPREDUCE_WORDSTREAMER_SCHUNKS_H
 
     #include "wordstreamer.h"
 
     /* ============================== Prototypes ============================ */
 
-    Wordstreamer*  mr_wordstreamer_scatter_create_first(const char*, const int,
+    Wordstreamer*  mr_wordstreamer_schunks_create_first(const char*, const int,
                                                                           bool);
-    Wordstreamer*  mr_wordstreamer_scatter_create_another(Wordstreamer*,
+    Wordstreamer*  mr_wordstreamer_schunks_create_another(const Wordstreamer*,
                                                                      const int);
-    void           mr_wordstreamer_scatter_delete(Wordstreamer*);
+    void           mr_wordstreamer_schunks_delete(Wordstreamer*);
 
-    int            mr_wordstreamer_scatter_get(Wordstreamer*, char*);
+    int            mr_wordstreamer_schunks_get(Wordstreamer*, char*);
 #endif

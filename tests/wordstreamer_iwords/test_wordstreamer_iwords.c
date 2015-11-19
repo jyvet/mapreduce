@@ -11,10 +11,10 @@
 * KIND, either express or implied.                                             *
 *******************************************************************************/
 
-#include "wordstreamer_interleave.h"
+#include "wordstreamer_iwords.h"
 #include <check.h>
 
-#define MAX_STREAMERS 8
+#define MAX_STREAMERS 11
 
 void create_file(const char *filename, const char *content) {
     FILE *fp;
@@ -33,8 +33,7 @@ START_TEST (test_create_delete)
     char *content = "content tests";
     create_file(filename, content);
 
-    Wordstreamer *ws = mr_wordstreamer_interleave_create_first(filename, 1,
-                                                                         false);
+    Wordstreamer *ws = mr_wordstreamer_iwords_create_first(filename, 1, false);
     ck_assert(ws != NULL);
 
     ck_assert_int_eq(ws->nb_streamers, 1);
@@ -42,7 +41,7 @@ START_TEST (test_create_delete)
     ck_assert_int_eq(ws->start_offset, 0);
     ck_assert_int_eq(ws->profiling, 0);
 
-    mr_wordstreamer_interleave_delete(ws);
+    mr_wordstreamer_iwords_delete(ws);
 
     /* Delete testfile */
     remove(filename);
@@ -57,32 +56,32 @@ START_TEST (test_singlestreamer_get)
     char *content = ".Donec!, ut  libero sed. ";
     create_file(filename, content);
 
-    Wordstreamer *ws = mr_wordstreamer_interleave_create_first(filename, 1,
-                                                                         false);
+    Wordstreamer *ws = mr_wordstreamer_iwords_create_first(filename, 1, false);
+    ck_assert(ws != NULL);
 
     char buffer[32];
     int ret;
 
-    ret = mr_wordstreamer_interleave_get(ws, buffer);
+    ret = mr_wordstreamer_iwords_get(ws, buffer);
     ck_assert_int_eq(ret, 0);
     ck_assert_str_eq(buffer, "donec");
 
-    ret = mr_wordstreamer_interleave_get(ws, buffer);
+    ret = mr_wordstreamer_iwords_get(ws, buffer);
     ck_assert_int_eq(ret, 0);
     ck_assert_str_eq(buffer, "ut");
 
-    ret = mr_wordstreamer_interleave_get(ws, buffer);
+    ret = mr_wordstreamer_iwords_get(ws, buffer);
     ck_assert_int_eq(ret, 0);
     ck_assert_str_eq(buffer, "libero");
 
-    ret = mr_wordstreamer_interleave_get(ws, buffer);
+    ret = mr_wordstreamer_iwords_get(ws, buffer);
     ck_assert_int_eq(ret, 0);
     ck_assert_str_eq(buffer, "sed");
 
-    ret = mr_wordstreamer_interleave_get(ws, buffer);
+    ret = mr_wordstreamer_iwords_get(ws, buffer);
     ck_assert_int_eq(ret, 1);
 
-    mr_wordstreamer_interleave_delete(ws);
+    mr_wordstreamer_iwords_delete(ws);
 
     /* Delete testfile */
     remove(filename);
@@ -92,6 +91,7 @@ END_TEST
 
 START_TEST (test_multiplestreamer_get)
 {
+    int i;
     /* Create test file */
     char *filename = "ws_test.txt";
     char *content = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. "
@@ -116,39 +116,41 @@ START_TEST (test_multiplestreamer_get)
     create_file(filename, content);
 
     /* Sequential streamer as a reference */
-    Wordstreamer *ws_ref = mr_wordstreamer_interleave_create_first(filename, 1,
+    Wordstreamer *ws_ref = mr_wordstreamer_iwords_create_first(filename, 1,
                                                                          false);
+    ck_assert(ws_ref != NULL);
     char ref[4096];
     char word[128];
 
-    if (!mr_wordstreamer_interleave_get(ws_ref, word)) strcpy(ref, word);
+    if (!mr_wordstreamer_iwords_get(ws_ref, word)) strcpy(ref, word);
 
-    while (!mr_wordstreamer_interleave_get(ws_ref, word)) {
+    while (!mr_wordstreamer_iwords_get(ws_ref, word)) {
         strcat(ref, " ");
         strcat(ref, word);
     }
 
-    mr_wordstreamer_interleave_delete(ws_ref);
+    mr_wordstreamer_iwords_delete(ws_ref);
 
 
     /* Check several streamers combination */
-    for (int i=2; i<=MAX_STREAMERS; i++) {
-        char comp[4096000];
-        int ret = 0;
-        int first = 1;
+    for (i=2; i<=MAX_STREAMERS; i++) {
+        char comp[4096];
+        int s, ret = 0, first = 1;
 
         /* Create streamers */
         Wordstreamer **ws = malloc(sizeof(Wordstreamer)*i);
-        ws[0] = mr_wordstreamer_interleave_create_first(filename, i, false);
+        ws[0] = mr_wordstreamer_iwords_create_first(filename, i, false);
+        ck_assert(ws[0] != NULL);
 
-        for(int s=1; s<i; s++) {
-            ws[s] = mr_wordstreamer_interleave_create_another(ws[0], s);
+        for(s=1; s<i; s++) {
+            ws[s] = mr_wordstreamer_iwords_create_another(ws[0], s);
+            ck_assert(ws[s] != NULL);
         }
 
         /* Retrieve words */
         while (! ret) {
-            for(int s=0; s<i; s++) {
-                if (!mr_wordstreamer_interleave_get(ws[s], word)) {
+            for(s=0; s<i; s++) {
+                if (!mr_wordstreamer_iwords_get(ws[s], word)) {
                     if (first) {
                         strcpy(comp, word);
                         first = 0;
@@ -162,8 +164,8 @@ START_TEST (test_multiplestreamer_get)
             }
         }
 
-        for(int s=0; s<i; s++) {
-            mr_wordstreamer_interleave_delete(ws[s]);
+        for(s=0; s<i; s++) {
+            mr_wordstreamer_iwords_delete(ws[s]);
         }
 
         free(ws);
@@ -176,8 +178,8 @@ START_TEST (test_multiplestreamer_get)
 END_TEST
 
 
-Suite *wordstreamer_interleave_suite(void) {
-    Suite *suite = suite_create("Wordstreamer Interleave");
+Suite *wordstreamer_iwords_suite(void) {
+    Suite *suite = suite_create("Wordstreamer Interleaved Words");
     TCase *tcase1 = tcase_create("Case Create Delete");
     TCase *tcase2 = tcase_create("Case Single streamer Get");
     TCase *tcase3 = tcase_create("Case mutiple streamers Get");
@@ -196,7 +198,7 @@ Suite *wordstreamer_interleave_suite(void) {
 
 int main(void) {
     int number_failed;
-    Suite *suite = wordstreamer_interleave_suite();
+    Suite *suite = wordstreamer_iwords_suite();
     SRunner *runner = srunner_create(suite);
 
     srunner_run_all(runner, CK_NORMAL);

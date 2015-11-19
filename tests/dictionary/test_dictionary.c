@@ -63,12 +63,13 @@ END_TEST
 
 START_TEST (test_massive_put)
 {
-    srand(1);
+    int i;
     char buffer[MAX_CHAR+1];
+    srand(1);
 
     Dictionary *dico = mr_dictionary_create(0);
 
-    for (int i=0; i<NB_TESTS; i++) {
+    for (i=0; i<NB_TESTS; i++) {
         int nb_char = rand()%MAX_CHAR + 1;
         int j;
 

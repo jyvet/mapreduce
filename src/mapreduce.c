@@ -22,38 +22,11 @@
 #include "mapreduce_parallel.h"
 #include "tools.h"
 
-void _stats_total(Mapreduce *);
+void _stats_total(Mapreduce*);
+Mapreduce* _mr_create(const char*, const int, const mr_type, const ws_type,
+                                                        const bool, const bool);
 
 /* ========================= Constructor / Destructor ======================= */
-
-/**
- * Constructor with detailled arguments to make unit tests easier.
- *
- * @param  file_path[in]    String containg the path to the file we want to read
- * @param  nb_threads[in]   Number of threads
- * @param  type[in]         Type of mapreduce to use
- * @param  quiet[in]        Activate the quiet mode (no output)
- * @param  profiling[in]    Activate the profiling mode
- * @return  A Mapreduce structure
- */
-Mapreduce* _mr_create(const char *file_path, const int nb_threads,
-    const int type, const int ws_type, const bool quiet, const bool profiling) {
-    Mapreduce *mr;
-
-    switch(type) {
-        default:
-        case TYPE_PARALLEL :
-            mr = mr_parallel_create(file_path, nb_threads, ws_type,
-                                                              quiet, profiling);
-            break;
-        case TYPE_SEQUENTIAL :
-            mr = mr_sequential_create(file_path, ws_type, quiet, profiling);
-            break;
-    }
-
-    return mr;
-}
-
 
 /**
  * Constructor based on Arguments provided to the program.
@@ -64,7 +37,7 @@ Mapreduce* _mr_create(const char *file_path, const int nb_threads,
 Mapreduce* mr_create(Arguments *args) {
     assert(args != NULL);
     return _mr_create(args->file_path, args->nb_threads, args->type,
-                                   args->ws_type, args->quiet, args->profiling);
+                            args->wstreamer_type, args->quiet, args->profiling);
 }
 
 
@@ -95,6 +68,37 @@ void mr_delete(Mapreduce **mr_ptr) {
 
 
 /* ============================= Private functions ========================== */
+
+/**
+ * Constructor with detailled arguments to make unit tests easier.
+ *
+ * @param  file_path[in]    String containg the path to the file we want to read
+ * @param  nb_threads[in]   Number of threads
+ * @param  type[in]         Type of mapreduce to use
+ * @param  quiet[in]        Activate the quiet mode (no output)
+ * @param  profiling[in]    Activate the profiling mode
+ * @return  A Mapreduce structure
+ */
+Mapreduce* _mr_create(const char *file_path, const int nb_threads,
+                               const mr_type type, const ws_type wstreamer_type,
+                                       const bool quiet, const bool profiling) {
+    Mapreduce *mr;
+
+    switch(type) {
+        default:
+        case MR_PARALLEL :
+            mr = mr_parallel_create(file_path, nb_threads, wstreamer_type,
+                                                              quiet, profiling);
+            break;
+        case MR_SEQUENTIAL :
+            mr = mr_sequential_create(file_path, wstreamer_type, quiet,
+                                                                     profiling);
+            break;
+    }
+
+    return mr;
+}
+
 
 /**
  * Print statistics such as Words/s.
@@ -128,37 +132,6 @@ void _stats_total(Mapreduce *mr) {
 
 
 /* ============================= Public functions =========================== */
-
-/**
- * Common constructor for implementations of Mapreduce.
- *
- * @param   file_path[in]     String containing the path to the file to read
- * @param   nb_threads[in]    Total number of threads
- * @param   type[in]          Type of mapreduce (see common.h)
- * @param   quiet[in]         Activate the quiet mode (no output)
- * @param   profiling[in]     Activate the profiling mode
- * @return  Pointer to the new Wordstreamer structure
- */
-Mapreduce* mr_common_create(const char *file_path, const int nb_threads,
-                       const int type, const bool quiet, const bool profiling) {
-
-    Mapreduce *mr = malloc(sizeof(Mapreduce));
-
-    mr->file_path = malloc(strlen(file_path)+1);
-    strcpy(mr->file_path, file_path);
-    mr->nb_threads = nb_threads;
-    mr->type = type;
-    mr->quiet = quiet;
-    mr->profiling = profiling;
-
-    _timer_init(&mr->timer_map, profiling);
-    _timer_init(&mr->timer_reduce, profiling);
-    _timer_init(&mr->timer_global, profiling);
-    _timer_start(&mr->timer_global);
-
-    return mr;
-}
-
 
 /**
  * Map operation.
