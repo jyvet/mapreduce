@@ -29,6 +29,7 @@
  * @return  Pointer to the new Dictionary structure
  */
 Dictionary *mr_dictionary_create(bool profiling) {
+    int i;
     Dictionary *dico = malloc(sizeof(Dictionary));
     assert(dico != NULL);
 
@@ -43,7 +44,7 @@ Dictionary *mr_dictionary_create(bool profiling) {
     assert(dico->hash_tab != NULL);
 
     /* Set to null first Word pointers in all buckets */
-    for (int i=0; i<dico->hash_size; i++){
+    for (i=0; i<dico->hash_size; i++){
         Bucket *b = &dico->hash_tab[i];
         b->word = NULL;
         #if MAPREDUCE_USE_BUFFALLOC
@@ -62,6 +63,7 @@ Dictionary *mr_dictionary_create(bool profiling) {
  * @param   ptr_dico[int]   Pointer to pointer of Dictionary structure
  */
 void mr_dictionary_delete(Dictionary **ptr_dico) {
+    int i;
     assert(ptr_dico != NULL);
     Dictionary *dico = *ptr_dico;
 
@@ -73,7 +75,7 @@ void mr_dictionary_delete(Dictionary **ptr_dico) {
         unsigned int hash_size = dico->hash_size;
 
         /* Delete all words */
-        for (int i=0; i<hash_size; i++){
+        for (i=0; i<hash_size; i++){
             Bucket *bucket = &dico->hash_tab[i];
 
             #if MAPREDUCE_USE_BUFFALLOC
@@ -237,10 +239,11 @@ void _mr_dictionary_add_word_count(Dictionary *dico, const char *word,
  * @param   second[in]    Pointer to the second dictionary
  */
 void mr_dictionary_merge(Dictionary* first, Dictionary* second) {
+    int i;
     assert(second->hash_size == first->hash_size);
     unsigned int hash_size = second->hash_size;
 
-    for (int i=0; i<hash_size; i++){
+    for (i=0; i<hash_size; i++){
         Bucket *bucket = &second->hash_tab[i];
         Word *word = bucket->word;
         while(word != NULL) {
@@ -285,9 +288,10 @@ unsigned int mr_dictionary_count_word(Dictionary *dico, const char *str) {
  * @param    dico[in]     Pointer to the dictionary
  */
 void mr_dictionary_display(Dictionary *dico) {
+    int i;
     unsigned int hash_size = dico->hash_size;
 
-    for (int i=0; i<hash_size; i++){
+    for (i=0; i<hash_size; i++){
         Bucket *bucket = &dico->hash_tab[i];
         Word *word = bucket->word;
 

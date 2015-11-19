@@ -34,6 +34,7 @@
 Mapreduce* mr_parallel_create(const char *file_path,
                                const unsigned int nb_threads, const int ws_type,
                                        const bool quiet, const bool profiling) {
+    int i;
     Mapreduce *mr = mr_common_create(file_path, nb_threads, TYPE_PARALLEL,
                                                               quiet, profiling);
 
@@ -53,7 +54,7 @@ Mapreduce* mr_parallel_create(const char *file_path,
     assert(threads[0].thread != NULL);
 
     /* Next threads */
-    for(int i=1; i<nb_threads; i++) {
+    for(i=1; i<nb_threads; i++) {
         threads[i].wordstreamer = mr_wordstreamer_create_another(
                                                     threads[0].wordstreamer, i);
         threads[i].dictionary = mr_dictionary_create(profiling);
@@ -72,10 +73,11 @@ Mapreduce* mr_parallel_create(const char *file_path,
  */
 void mr_parallel_delete(Mapreduce *mr) {
     if (mr != NULL) {
+        int i;
         Mapreduce_parallel_thread *threads = (Mapreduce_parallel_thread *) mr->ext;
         int nb_threads =  mr->nb_threads;
 
-        for(int i=0; i<nb_threads; i++) {
+        for(i=0; i<nb_threads; i++) {
             mr_wordstreamer_delete(&threads[i].wordstreamer);
             mr_dictionary_delete(&threads[i].dictionary);
             free(threads[i].thread);
@@ -116,17 +118,18 @@ void* _thread_map(void *t_struct) {
  * @param   mr[inout]     Pointer to a Mapreduce structure
  */
 void mr_parallel_map(Mapreduce *mr) {
+    int i;
     assert(mr != NULL);
     int nb_threads = mr->nb_threads;
     Mapreduce_parallel_thread *threads = (Mapreduce_parallel_thread *) mr->ext;
 
     /* Launch all threads */
-    for(int i=0; i<nb_threads; i++) {
+    for(i=0; i<nb_threads; i++) {
         pthread_create(threads[i].thread, NULL, _thread_map, &threads[i]);
     }
 
     /* Join all threads */
-    for(int i=0; i<nb_threads; i++) {
+    for(i=0; i<nb_threads; i++) {
         pthread_join(*threads[i].thread, NULL);
     }
 }
@@ -138,12 +141,13 @@ void mr_parallel_map(Mapreduce *mr) {
  * @param   mr[inout]     Pointer to a Mapreduce structure
  */
 void mr_parallel_reduce(Mapreduce *mr) {
+    int i;
     assert(mr != NULL);
     int nb_threads = mr->nb_threads;
     Mapreduce_parallel_thread *threads = (Mapreduce_parallel_thread *) mr->ext;
     Dictionary *dico = threads[0].dictionary;
 
-    for(int i=1; i<nb_threads; i++) {
+    for(i=1; i<nb_threads; i++) {
         mr_dictionary_merge(dico, threads[i].dictionary);
     }
 
