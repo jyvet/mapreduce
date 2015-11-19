@@ -1,17 +1,17 @@
 project (mapreduce)
 
-SET(CMAKE_C_FLAGS "-O3 -march=native")
+SET(CMAKE_C_FLAGS "-O3 -march=native -std=gnu99")
 
 OPTION(DEBUG "Debug mode." OFF)
 
 # use cmake -D DEBUG:BOOL=TRUE
 IF(DEBUG)
-    SET(CMAKE_C_FLAGS "-g -Wall")
+    SET(CMAKE_C_FLAGS "-g -Wall -std=gnu99")
 ENDIF(DEBUG)
 
 # use cmake -D GPROF:BOOL=TRUE
 IF(GPROF)
-    SET(CMAKE_C_FLAGS "-pg -Wall")
+    SET(CMAKE_C_FLAGS "-pg -Wall -std=gnu99")
 ENDIF(GPROF)
 
 SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
