@@ -46,11 +46,12 @@ END_TEST
 
 START_TEST (test_massiv_malloc)
 {
+    int i;
     Buffalloc *ba = mr_buffalloc_create();
     long int alloc_size = 0;
     srand(1);
 
-    for (int i=0; i<NB_TESTS; i++) {
+    for (i=0; i<NB_TESTS; i++) {
         int j, size = rand()%MAX_MALLOC_SIZE;
 
         char *alloc = mr_buffalloc_malloc(ba, size);
