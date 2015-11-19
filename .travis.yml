@@ -1,9 +1,10 @@
 language: c
-compiler:
-  - gcc
+compiler: gcc
+  - env
 before_install:
   - travis_retry sudo apt-get update
   - travis_retry sudo apt-get install cmake check
+  - export CC="gcc-4.8"
 before_script:
   - mkdir build
   - cd build
