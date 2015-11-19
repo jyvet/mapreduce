@@ -31,7 +31,7 @@ START_TEST (test_delete)
     Arguments *args = mr_args_create(3, argv);
 
     mr_args_delete(&args);
-    ck_assert(args != NULL);
+    ck_assert(args == NULL);
 }
 END_TEST
 

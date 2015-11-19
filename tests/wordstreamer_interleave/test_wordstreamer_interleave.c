@@ -20,7 +20,7 @@ void create_file(const char *filename, const char *content) {
     FILE *fp;
     fp = fopen (filename,"w");
     if (fp!=NULL) {
-        fprintf(fp, content);
+        fprintf(fp, "%s", content);
         fclose (fp);
     }
 }

@@ -45,10 +45,12 @@ END_TEST
 
 START_TEST (test_massiv_create)
 {
-    srand(1);
     char buffer[MAX_CHAR+1];
+    int i;
 
-    for (int i=0; i<NB_TESTS; i++) {
+    srand(1);
+
+    for (i=0; i<NB_TESTS; i++) {
         int nb_char = rand()%MAX_CHAR + 1;
         int j;
 
@@ -62,7 +64,7 @@ START_TEST (test_massiv_create)
         /* Add word */
         Word *word = mr_word_create(buffer);
 
-        ck_assert(word == NULL);
+        ck_assert(word != NULL);
         ck_assert_int_eq(word->length, nb_char);
         ck_assert_str_eq(word->name, buffer);
 
