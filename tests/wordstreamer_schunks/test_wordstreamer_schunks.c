@@ -91,6 +91,7 @@ END_TEST
 
 START_TEST (test_multiplestreamer_get)
 {
+    int i;
     /* Create test file */
     char *filename = "ws_test.txt";
     char *content = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. "
@@ -131,7 +132,8 @@ START_TEST (test_multiplestreamer_get)
     mr_wordstreamer_schunks_delete(ws);
 
     /* Check several streamers combination */
-    for (int i=2; i<=MAX_STREAMERS; i++) {
+    for (i=2; i<=MAX_STREAMERS; i++) {
+        int s;
         char comp[4096];
         Wordstreamer *first_ws = mr_wordstreamer_schunks_create_first(filename,
                                                                       i, false);
@@ -144,7 +146,7 @@ START_TEST (test_multiplestreamer_get)
             strcat(comp, word);
         }
 
-        for(int s=1; s<i; s++) {
+        for(s=1; s<i; s++) {
             Wordstreamer *another_ws =
                             mr_wordstreamer_schunks_create_another(first_ws, s);
             ck_assert(another_ws != NULL);

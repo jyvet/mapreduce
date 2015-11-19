@@ -91,6 +91,7 @@ END_TEST
 
 START_TEST (test_multiplestreamer_get)
 {
+    int i;
     /* Create test file */
     char *filename = "ws_test.txt";
     char *content = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. "
@@ -132,24 +133,23 @@ START_TEST (test_multiplestreamer_get)
 
 
     /* Check several streamers combination */
-    for (int i=2; i<=MAX_STREAMERS; i++) {
+    for (i=2; i<=MAX_STREAMERS; i++) {
         char comp[4096];
-        int ret = 0;
-        int first = 1;
+        int s, ret = 0, first = 1;
 
         /* Create streamers */
         Wordstreamer **ws = malloc(sizeof(Wordstreamer)*i);
         ws[0] = mr_wordstreamer_iwords_create_first(filename, i, false);
         ck_assert(ws[0] != NULL);
 
-        for(int s=1; s<i; s++) {
+        for(s=1; s<i; s++) {
             ws[s] = mr_wordstreamer_iwords_create_another(ws[0], s);
             ck_assert(ws[s] != NULL);
         }
 
         /* Retrieve words */
         while (! ret) {
-            for(int s=0; s<i; s++) {
+            for(s=0; s<i; s++) {
                 if (!mr_wordstreamer_iwords_get(ws[s], word)) {
                     if (first) {
                         strcpy(comp, word);
@@ -164,7 +164,7 @@ START_TEST (test_multiplestreamer_get)
             }
         }
 
-        for(int s=0; s<i; s++) {
+        for(s=0; s<i; s++) {
             mr_wordstreamer_iwords_delete(ws[s]);
         }
 
