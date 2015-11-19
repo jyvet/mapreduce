@@ -35,7 +35,7 @@ START_TEST (test_create_delete)
 
     Wordstreamer *ws = mr_wordstreamer_interleave_create_first(filename, 1,
                                                                          false);
-    ck_assert_ptr_ne(ws, NULL);
+    ck_assert(ws != NULL);
 
     ck_assert_int_eq(ws->nb_streamers, 1);
     ck_assert_int_eq(ws->streamer_id, 0);

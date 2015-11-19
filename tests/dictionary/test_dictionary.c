@@ -33,7 +33,7 @@ START_TEST (test_delete)
     Dictionary *dico = mr_dictionary_create(0);
 
     mr_dictionary_delete(&dico);
-    ck_assert_ptr_eq(dico, NULL);
+    ck_assert(dico == NULL);
 }
 END_TEST
 
@@ -83,7 +83,7 @@ START_TEST (test_massive_put)
         mr_dictionary_put_word(dico, buffer);
 
         int count = mr_dictionary_count_word(dico, buffer);
-        ck_assert_int_ge(count, 1);
+        ck_assert(count >= 1);
     }
 
     mr_dictionary_delete(&dico);

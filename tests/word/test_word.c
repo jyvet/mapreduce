@@ -23,11 +23,11 @@ START_TEST (test_create)
 {
     Word *word = mr_word_create("test");
 
-    ck_assert_ptr_ne(word, NULL);
+    ck_assert(word != NULL);
     ck_assert_str_eq(word->name, "test");
     ck_assert_int_eq(word->length, 4);
     ck_assert_int_eq(word->count, 1);
-    ck_assert_ptr_eq(word->next, NULL);
+    ck_assert(word->next == NULL);
 
     mr_word_delete(&word);
 }
@@ -38,7 +38,7 @@ START_TEST (test_delete)
 {
     Word *word = mr_word_create("test");
     mr_word_delete(&word);
-    ck_assert_ptr_eq(word, NULL);
+    ck_assert(word == NULL);
 }
 END_TEST
 
@@ -62,7 +62,7 @@ START_TEST (test_massiv_create)
         /* Add word */
         Word *word = mr_word_create(buffer);
 
-        ck_assert_ptr_ne(word, NULL);
+        ck_assert(word == NULL);
         ck_assert_int_eq(word->length, nb_char);
         ck_assert_str_eq(word->name, buffer);
 

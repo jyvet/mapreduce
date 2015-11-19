@@ -21,10 +21,10 @@ START_TEST (test_create)
 {
     Buffalloc *ba = mr_buffalloc_create();
 
-    ck_assert_ptr_ne(ba, NULL);
-    ck_assert_int_gt(ba->chunk_size, 0);
+    ck_assert(ba != NULL);
+    ck_assert(ba->chunk_size > 0);
     ck_assert_int_eq(ba->alloc_size, 0);
-    ck_assert_ptr_eq(ba->last_chunk, NULL);
+    ck_assert(ba->last_chunk == NULL);
 
     mr_buffalloc_delete(&ba);
 }
@@ -34,12 +34,12 @@ END_TEST
 START_TEST (test_delete)
 {
     Buffalloc *ba = mr_buffalloc_create();
-    ck_assert_ptr_ne(ba, NULL);
+    ck_assert(ba != NULL);
 
     mr_buffalloc_malloc(ba, 64);
 
     mr_buffalloc_delete(&ba);
-    ck_assert_ptr_eq(ba, NULL);
+    ck_assert(ba == NULL);
 }
 END_TEST
 
@@ -54,14 +54,14 @@ START_TEST (test_massiv_malloc)
         int j, size = rand()%MAX_MALLOC_SIZE;
 
         char *alloc = mr_buffalloc_malloc(ba, size);
-        ck_assert_ptr_ne(alloc, NULL);
+        ck_assert(alloc != NULL);
 
         for (j=0; j<size; j++) {
             alloc[j] = 1;
         }
 
         alloc_size += size;
-        ck_assert_int_ge(ba->alloc_size, alloc_size);
+        ck_assert(ba->alloc_size >= alloc_size);
     }
     mr_buffalloc_delete(&ba);
 }

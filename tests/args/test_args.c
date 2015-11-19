@@ -18,7 +18,7 @@ START_TEST (test_create)
 {
     char *argv[3] = {"", "file", "1"};
     Arguments *args = mr_args_create(3, argv);
-    ck_assert_ptr_ne(args, NULL);
+    ck_assert(args != NULL);
 
     mr_args_delete(&args);
 }
@@ -31,7 +31,7 @@ START_TEST (test_delete)
     Arguments *args = mr_args_create(3, argv);
 
     mr_args_delete(&args);
-    ck_assert_ptr_eq(args, NULL);
+    ck_assert(args != NULL);
 }
 END_TEST
 

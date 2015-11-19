@@ -35,7 +35,7 @@ START_TEST (test_create_delete)
     Mapreduce *mr = mr_sequential_create(filename, TYPE_WORDSTREAMER_SCATTER,
                                                                    true, false);
 
-    ck_assert_ptr_ne(mr, NULL);
+    ck_assert(mr != NULL);
 
     mr_sequential_delete(mr);
 
@@ -72,12 +72,12 @@ START_TEST (test_mapreduce)
 
     Mapreduce *mr = mr_sequential_create(filename, TYPE_WORDSTREAMER_SCATTER,
                                                                    true, false);
-    ck_assert_ptr_ne(mr, NULL);
+    ck_assert(mr != NULL);
 
-    ck_assert_ptr_ne(mr->ext, NULL);
+    ck_assert(mr->ext != NULL);
     Mapreduce_sequential_ext *ext = (Mapreduce_sequential_ext *) mr->ext;
 
-    ck_assert_ptr_ne(ext->dictionary, NULL);
+    ck_assert(ext->dictionary != NULL);
     Dictionary *dico = ext->dictionary;
 
     /* Perform map and reduce */
