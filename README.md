@@ -1,7 +1,8 @@
 [![Build Status](https://travis-ci.org/jyvet/mapreduce.svg?branch=master)](https://travis-ci.org/jyvet/mapreduce)
 
 MapReduce
----------
+=========
+
 The purpose of this program is to compute the number of occurrences of each word in a given file. The program implements a map/reduce paradigm in shared memory using pthreads.
 
 
@@ -15,15 +16,27 @@ Dependencies
 Building MapReduce
 ------------------
 
+Using the cmake wrapper:
+
+    % ./configure && make
+
+Using directly cmake:
+
     % mkdir -p build && cd build && cmake .. && make && cd ..
 
 
 Building and running unit tests
 -------------------------------
+
+Using the cmake wrapper:
+
+    % ./configure --enable-tests && make
+    % make test
+
+
+Using directly cmake:
+   
     % mkdir -p build && cd build && cmake -D BUILD_TESTS:BOOL=TRUE .. && make
-
-After building MapReduce, test it using:
-
     % ctest
 
 
