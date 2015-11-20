@@ -19,7 +19,7 @@
 
 #include "wordstreamer.h"
 #include "wordstreamer_schunks.h"
-#include "wordstreamer_iwords.h"
+//#include "wordstreamer_iwords.h"
 
 /* ========================= Constructor / Destructor ======================= */
 
@@ -38,10 +38,10 @@ Wordstreamer* mr_wordstreamer_create_first(const char* file_path,
 
     switch(type) {
         default:
-        case WS_IWORDS :
-            ws = mr_wordstreamer_iwords_create_first(file_path,
-                                                       nb_streamers, profiling);
-            break;
+        //case WS_IWORDS :
+            //ws = mr_wordstreamer_iwords_create_first(file_path,
+            //                                           nb_streamers, profiling);
+            //break;
         case WS_SCHUNKS :
             ws = mr_wordstreamer_schunks_create_first(file_path, nb_streamers,
                                                                      profiling);
@@ -78,25 +78,4 @@ void mr_wordstreamer_delete(Wordstreamer **ws_ptr) {
 
     /* Set pointer to NULL */
     *ws_ptr = NULL;
-}
-
-
-/* ============================= Public functions =========================== */
-
-/**
- * Get next word from a wordstreamer. Return 1 if end of stream reached.
- *
- * @param   ws[in]               Pointer to the Wordstreamer structure
- * @param   buffer[inout]        Buffer to hold the retrieved word
- * @return  0 if a word was copied into the buffer or 1 if the end of the stream
- *          was reached
- */
-int mr_wordstreamer_get(Wordstreamer *ws, char *buffer) {
-    assert(ws != NULL);
-
-    _timer_start(&ws->timer_get);
-    int ret = ws->get(ws, buffer);
-    _timer_stop(&ws->timer_get);
-
-    return ret;
 }

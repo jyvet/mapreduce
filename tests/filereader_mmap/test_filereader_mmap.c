@@ -11,10 +11,10 @@
 * KIND, either express or implied.                                             *
 *******************************************************************************/
 
-#include "wordstreamer_schunks.h"
 #include <check.h>
+#include "filereader_mmap.h"
 
-#define MAX_STREAMERS 11
+#define MAX_READERS 11
 
 void create_file(const char *filename, const char *content) {
     FILE *fp;
@@ -33,14 +33,10 @@ START_TEST (test_create_delete)
     char *content = "content tests";
     create_file(filename, content);
 
-    Wordstreamer *ws = mr_wordstreamer_schunks_create_first(filename, 1, false);
-    ck_assert(ws != NULL);
+    Filereader *fr = mr_filereader_mmap_create_first(filename, false);
+    ck_assert(fr != NULL);
 
-    ck_assert_int_eq(ws->nb_streamers, 1);
-    ck_assert_int_eq(ws->streamer_id, 0);
-    ck_assert_int_eq(ws->profiling, 0);
-
-    mr_wordstreamer_schunks_delete(ws);
+    mr_filereader_mmap_delete(fr);
 
     /* Delete testfile */
     remove(filename);
@@ -48,49 +44,12 @@ START_TEST (test_create_delete)
 END_TEST
 
 
-START_TEST (test_singlestreamer_get)
+START_TEST (test_multiple_readers)
 {
-    /* Create test file */
-    char *filename = "ws_test.txt";
-    char *content = ".Donec!, ut  libero sed. ";
-    create_file(filename, content);
+    int i, j;
+    char buffer_byte;
+    char buffer[4096];
 
-    Wordstreamer *ws = mr_wordstreamer_schunks_create_first(filename, 1, false);
-    ck_assert(ws != NULL);
-
-    char buffer[32];
-    int ret;
-
-    ret = mr_wordstreamer_schunks_get(ws, buffer);
-    ck_assert_int_eq(ret, 0);
-    ck_assert_str_eq(buffer, "donec");
-
-    ret = mr_wordstreamer_schunks_get(ws, buffer);
-    ck_assert_int_eq(ret, 0);
-    ck_assert_str_eq(buffer, "ut");
-
-    ret = mr_wordstreamer_schunks_get(ws, buffer);
-    ck_assert_int_eq(ret, 0);
-    ck_assert_str_eq(buffer, "libero");
-
-    ret = mr_wordstreamer_schunks_get(ws, buffer);
-    ck_assert_int_eq(ret, 0);
-    ck_assert_str_eq(buffer, "sed");
-
-    ret = mr_wordstreamer_schunks_get(ws, buffer);
-    ck_assert_int_eq(ret, 1);
-
-    mr_wordstreamer_schunks_delete(ws);
-
-    /* Delete testfile */
-    remove(filename);
-}
-END_TEST
-
-
-START_TEST (test_multiplestreamer_get)
-{
-    int i;
     /* Create test file */
     char *filename = "ws_test.txt";
     char *content = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. "
@@ -114,53 +73,53 @@ START_TEST (test_multiplestreamer_get)
 
     create_file(filename, content);
 
-    /* Sequential streamer as a reference */
-    Wordstreamer *ws = mr_wordstreamer_schunks_create_first(filename, 1, false);
-    ck_assert(ws != NULL);
+    /* Check several combinations */
+    for (i=1; i<=MAX_READERS; i++) {
+        int buffer_index = 0;
+        Filereader *fr[MAX_READERS];
 
-    char ref[4096];
-    char word[128];
+        /* Create first reader */
+        fr[0] = mr_filereader_mmap_create_first(filename, false);
+        ck_assert(fr[0] != NULL);
 
-    if (!mr_wordstreamer_schunks_get(ws, word)) strcpy(ref, word);
-
-    while (!mr_wordstreamer_schunks_get(ws, word)) {
-        strcat(ref, " ");
-        strcat(ref, word);
-    }
-
-    mr_wordstreamer_schunks_delete(ws);
-
-    /* Check several streamers combination */
-    for (i=2; i<=MAX_STREAMERS; i++) {
-        int s;
-        char comp[4096];
-        Wordstreamer *first_ws = mr_wordstreamer_schunks_create_first(filename,
-                                                                      i, false);
-        ck_assert(first_ws != NULL);
-
-        if (!mr_wordstreamer_schunks_get(first_ws, word)) strcpy(comp, word);
-
-        while (!mr_wordstreamer_schunks_get(first_ws, word)) {
-            strcat(comp, " ");
-            strcat(comp, word);
+        /* Create other readers */
+        for (j=1; j<i; j++) {
+            fr[j] = mr_filereader_mmap_create_another(fr[0], j);
+            ck_assert(fr[j] != NULL);
         }
 
-        for(s=1; s<i; s++) {
-            Wordstreamer *another_ws =
-                            mr_wordstreamer_schunks_create_another(first_ws, s);
-            ck_assert(another_ws != NULL);
+        size_t file_size = fr[0]->file_size;
+        long long chunk_size = file_size/i;
+        long long chunk_rest = file_size%i;
 
-            while (!mr_wordstreamer_schunks_get(another_ws, word)) {
-                strcat(comp, " ");
-                strcat(comp, word);
+        /* Initialize offsets */
+        for (j=0; j<i; j++) {
+            long long start_offset = j*chunk_size;
+            long long end_offset = (j+1)*chunk_size-1;
+
+            if (j==i-1) {
+                end_offset += chunk_rest;
             }
 
-            mr_wordstreamer_schunks_delete(another_ws);
+            mr_filereader_mmap_set_offsets(fr[j], start_offset, end_offset);
         }
 
-        mr_wordstreamer_schunks_delete(first_ws);
+        /* Retrieve bytes */
+        for (j=0; j<i; j++) {
+            while(!mr_filereader_mmap_get_byte(fr[j], &buffer_byte)) {
+                buffer[buffer_index++] = buffer_byte;
+            }
+        }
+        buffer[buffer_index] = '\0';
 
-        ck_assert_str_eq(comp, ref);
+        /* Check some occurences */
+        ck_assert_str_eq(buffer, content);
+
+
+        /* Delete all readers */
+        for (j=0; j<i; j++) {
+            mr_filereader_mmap_delete(fr[j]);
+        }
     }
 
     remove(filename);
@@ -168,19 +127,16 @@ START_TEST (test_multiplestreamer_get)
 END_TEST
 
 
-Suite *wordstreamer_schunks_suite(void) {
-    Suite *suite = suite_create("Wordstreamer Scattered Chunks");
+Suite *filereader_suite(void) {
+    Suite *suite = suite_create("Filereader Mmap");
     TCase *tcase1 = tcase_create("Case Create Delete");
-    TCase *tcase2 = tcase_create("Case Single streamer Get");
-    TCase *tcase3 = tcase_create("Case mutiple streamers Get");
+    TCase *tcase2 = tcase_create("Case Multiple Readers");
 
     tcase_add_test(tcase1, test_create_delete);
-    tcase_add_test(tcase2, test_singlestreamer_get);
-    tcase_add_test(tcase3, test_multiplestreamer_get);
+    tcase_add_test(tcase2, test_multiple_readers);
 
     suite_add_tcase(suite, tcase1);
     suite_add_tcase(suite, tcase2);
-    suite_add_tcase(suite, tcase3);
 
     return suite;
 }
@@ -188,7 +144,7 @@ Suite *wordstreamer_schunks_suite(void) {
 
 int main(void) {
     int number_failed;
-    Suite *suite = wordstreamer_schunks_suite();
+    Suite *suite = filereader_suite();
     SRunner *runner = srunner_create(suite);
 
     srunner_run_all(runner, CK_NORMAL);

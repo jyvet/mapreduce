@@ -78,9 +78,9 @@ void  mr_wordstreamer_iwords_delete(Wordstreamer* ws) {
  * @param   profiling[in]     Activate the profiling mode
  * @return  Pointer to the new Wordstreamer structure
  */
-Wordstreamer* _mr_wordstreamer_iwords_create(
-          const char* file_path, char *shared_map,
-          const int streamer_id, const int nb_streamers, const bool profiling) {
+Wordstreamer* _mr_wordstreamer_iwords_create(const char* file_path,
+                                        char *shared_map, const int streamer_id,
+                                 const int nb_streamers, const bool profiling) {
 
     Wordstreamer *ws = _mr_wordstreamer_common_create(file_path, shared_map,
                                           streamer_id, nb_streamers, profiling);
