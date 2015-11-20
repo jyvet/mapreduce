@@ -32,7 +32,7 @@
  * @param   profiling[in]     Activate the profiling mode
  * @return  Pointer to the new Wordstreamer structure
  */
-Wordstreamer* mr_wordstreamer_create_first (const char* file_path,
+Wordstreamer* mr_wordstreamer_create_first(const char* file_path,
                    const int nb_streamers, const ws_type type, bool profiling) {
     Wordstreamer *ws;
 
@@ -56,7 +56,7 @@ Wordstreamer* mr_wordstreamer_create_first (const char* file_path,
  * Constructor for each other streamer.
  *
  * @param   first[in]        String containing the path to the file to read
- * @param   streamer_id[in]  Total number of streamers
+ * @param   streamer_id[in]  Id of the current wordstreamer
  * @return  Pointer to the new Wordstreamer structure
  */
 Wordstreamer* mr_wordstreamer_create_another(const Wordstreamer* first,
@@ -87,7 +87,7 @@ void mr_wordstreamer_delete(Wordstreamer **ws_ptr) {
  * Get next word from a wordstreamer. Return 1 if end of stream reached.
  *
  * @param   ws[in]               Pointer to the Wordstreamer structure
- * @param   shared_map[inout]    Buffer to hold the retrieved word
+ * @param   buffer[inout]        Buffer to hold the retrieved word
  * @return  0 if a word was copied into the buffer or 1 if the end of the stream
  *          was reached
  */

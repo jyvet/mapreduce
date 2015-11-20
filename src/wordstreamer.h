@@ -35,11 +35,11 @@
         Wordstreamer* (*create_another)();
         char*        shared_map;   /**<  Memory area where the file is mapped */
         char*        file_path;    /**<  String for the path to the file      */
-        long int     file_size;    /**<  File size in Bytes                   */
-        long int     start_offset; /**<  Start offset for the Wordstreamer    */
-        long int     stop_offset;  /**<  End offset for the Wordstreamer      */
-        long int     chunk_size;   /**<  Chunk size for the Wordstreamer      */
-        long int     offset;       /**<  Offset index for the next character  */
+        long long    file_size;    /**<  File size in Bytes                   */
+        long long    start_offset; /**<  Start offset for the Wordstreamer    */
+        long long    stop_offset;  /**<  End offset for the Wordstreamer      */
+        long long    chunk_size;   /**<  Chunk size for the Wordstreamer      */
+        long long    offset;       /**<  Offset index for the next character  */
         int          fd;           /**<  File descriptor                      */
         unsigned int streamer_id;  /**<  Id of the current Wordstreamer       */
         unsigned int nb_streamers; /**<  Total number of streamers            */

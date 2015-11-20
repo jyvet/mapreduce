@@ -45,7 +45,7 @@ Wordstreamer* mr_wordstreamer_iwords_create_first(const char* file_path,
  * Constructor for each other streamer.
  *
  * @param   first[in]        String containing the path to the file to read
- * @param   streamer_id[in]  Total number of streamers
+ * @param   streamer_id[in]  Id of the current wordstreamer
  * @return  Pointer to the new Wordstreamer structure
  */
 Wordstreamer* mr_wordstreamer_iwords_create_another(const Wordstreamer* first,
@@ -82,7 +82,7 @@ Wordstreamer* _mr_wordstreamer_iwords_create(
           const char* file_path, char *shared_map,
           const int streamer_id, const int nb_streamers, const bool profiling) {
 
-    Wordstreamer *ws =  _mr_wordstreamer_common_create(file_path, shared_map,
+    Wordstreamer *ws = _mr_wordstreamer_common_create(file_path, shared_map,
                                           streamer_id, nb_streamers, profiling);
 
     /* Set function pointers */
@@ -165,7 +165,6 @@ static inline void _mr_wordstreamer_iwords_retrieve_word(Wordstreamer *ws,
  *          was reached
  */
 int mr_wordstreamer_iwords_get(Wordstreamer *ws, char *buffer) {
-    _timer_start(&ws->timer_get);
     char word[MAPREDUCE_MAX_WORD_SIZE];
     int nb_streamers = ws->nb_streamers, streamer_id = ws->streamer_id;
     char* map = ws->shared_map;
@@ -196,6 +195,5 @@ int mr_wordstreamer_iwords_get(Wordstreamer *ws, char *buffer) {
         }
     }
 
-    _timer_stop(&ws->timer_get);
     return (word_count <= streamer_id);
 }

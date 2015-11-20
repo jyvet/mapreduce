@@ -45,7 +45,7 @@ Wordstreamer* mr_wordstreamer_schunks_create_first(const char* file_path,
  * Constructor for each other streamer.
  *
  * @param   first[in]        String containing the path to the file to read
- * @param   streamer_id[in]  Total number of streamers
+ * @param   streamer_id[in]  Id of the current wordstreamer
  * @return  Pointer to the new Wordstreamer structure
  */
 Wordstreamer* mr_wordstreamer_schunks_create_another(const Wordstreamer* first,
@@ -82,7 +82,7 @@ Wordstreamer* _mr_wordstreamer_schunks_create(
           const char* file_path, char *shared_map,
           const int streamer_id, const int nb_streamers, const bool profiling) {
 
-    Wordstreamer *ws =  _mr_wordstreamer_common_create(file_path, shared_map,
+    Wordstreamer *ws = _mr_wordstreamer_common_create(file_path, shared_map,
                                           streamer_id, nb_streamers, profiling);
 
     /* Set function pointers */
@@ -178,7 +178,6 @@ static inline void _mr_wordstreamer_schunks_retrieve_word(Wordstreamer *ws,
  *          was reached
  */
 int mr_wordstreamer_schunks_get(Wordstreamer *ws, char *buffer) {
-    _timer_start(&ws->timer_get);
     int streamer_id = ws->streamer_id;
     char* map = ws->shared_map;
     long int offset, file_size = ws->file_size, start_offset = ws->start_offset;
@@ -189,7 +188,7 @@ int mr_wordstreamer_schunks_get(Wordstreamer *ws, char *buffer) {
 
     /* Remove incomplete words, spaces and punctuation */
     _mr_wordstreamer_schunks_remove_nonwords(ws, file_size, start_offset,
-                                                             streamer_id, map);
+                                                              streamer_id, map);
 
     offset = ws->offset;
 
@@ -198,24 +197,24 @@ int mr_wordstreamer_schunks_get(Wordstreamer *ws, char *buffer) {
         _mr_wordstreamer_schunks_retrieve_word(ws, file_size, buffer, map);
 
         if (ws->offset > stop_offset) ws->end = true;
-        _timer_stop(&ws->timer_get);
 
         return 0;
     } else {
         char character = map[offset];
- 
+
         /* Retrieve one more word (last word on two chunks) */
-        if(offset== stop_offset && !ispunct(character) && !isspace(character) && offset < file_size) {
+        if(offset == stop_offset
+           && !ispunct(character)
+           && !isspace(character)
+           && offset < file_size) {
 
             _mr_wordstreamer_schunks_retrieve_word(ws, file_size, buffer, map);
             ws->end = true;
-            _timer_stop(&ws->timer_get);
 
             return 0;
         } else {
             /* Return because end of stream reached */
             ws->end = true;
-            _timer_stop(&ws->timer_get);
 
             return 1;
         }
