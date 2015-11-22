@@ -31,8 +31,8 @@
 
     /* ============================== Prototypes ============================ */
 
-    Mapreduce*  mr_sequential_create(const char*, const ws_type, const bool,
-                                                                    const bool);
+    Mapreduce*  mr_sequential_create(const char*, const ws_type,  const fr_type,
+                                    const unsigned int, const bool, const bool);
     void        mr_sequential_delete(Mapreduce*);
 
     void        mr_sequential_map(Mapreduce*);

@@ -17,6 +17,8 @@
     #include "common.h"
 
     #define MAPREDUCE_DEFAULT_TYPE            MR_PARALLEL
+    #define MAPREDUCE_FR_DEFAULT_TYPE         FR_MMAP
+    #define MAPREDUCE_FR_DEFAULT_READ_SIZE    16384
     #define MAPREDUCE_WS_DEFAULT_TYPE         WS_SCHUNKS
     #define MAPREDUCE_WS_DEFAULT_CHUNK_SIZE   16
     #define MAPREDUCE_DEFAULT_USECOLORS       1

@@ -21,6 +21,9 @@ ADD_EXECUTABLE (${TEST_NAME} ${SRC_PATH}/${NAME}.c ${TEST_NAME}.c
                 ${SRC_PATH}/dictionary.c
                 ${SRC_PATH}/buffalloc.c
                 ${SRC_PATH}/buffalloc.c
+                ${SRC_PATH}/filereader.c
+                ${SRC_PATH}/filereader_mmap.c
+                ${SRC_PATH}/filereader_read.c
                 ${SRC_PATH}/wordstreamer.c
                 ${SRC_PATH}/wordstreamer_schunks.c
                 ${SRC_PATH}/wordstreamer_iwords.c

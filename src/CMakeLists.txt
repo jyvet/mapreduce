@@ -1,6 +1,6 @@
 project (mapreduce)
 
-SET(CMAKE_C_FLAGS "-O3 -march=native -std=gnu99")
+SET(CMAKE_C_FLAGS "-O2 -march=native")
 
 OPTION(DEBUG "Debug mode." OFF)
 
@@ -23,6 +23,9 @@ ADD_EXECUTABLE(mapred main.c
                       tools.c
                       buffalloc.c
                       word.c
+                      filereader.c
+                      filereader_mmap.c
+                      filereader_read.c
                       wordstreamer.c
                       wordstreamer_schunks.c
                       wordstreamer_iwords.c

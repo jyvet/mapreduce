@@ -34,8 +34,8 @@
     /* ============================== Prototypes ============================ */
 
     Mapreduce*   mr_parallel_create(const char*, const unsigned int,
-                                         const ws_type, const bool, const bool);
-
+                               const ws_type, const fr_type, const unsigned int,
+                                                        const bool, const bool);
     void         mr_parallel_delete(Mapreduce*);
 
     void         mr_parallel_map(Mapreduce*);

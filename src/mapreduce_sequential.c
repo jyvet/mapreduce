@@ -26,12 +26,18 @@
  * Constructor for Mapreduce sequential.
  *
  * @param  file_path[in]    String containg the path to the file we want to read
+ * @param  nb_threads[in]   Number of threads to use
+ * @param  wstreamer_type[in]   Type of wordstreamer to use
+ * @param  reader_type[in]      Type of filereader to use
+ * @param  read_buffer_size[in] Size in bytes of the read buffer
  * @param  quiet[in]        Activate the quiet mode (no output)
  * @param  profiling[in]    Activate the profiling mode
  * @return  A Mapreduce structure
  */
 Mapreduce* mr_sequential_create(const char *file_path,
-         const ws_type wstreamer_type, const bool quiet, const bool profiling) {
+                        const ws_type wstreamer_type, const fr_type reader_type,
+                                       unsigned int reader_buffer_size,
+                                       const bool quiet, const bool profiling) {
     Mapreduce *mr = _mr_common_create(file_path, 1, MR_SEQUENTIAL,
                                                               quiet, profiling);
     /* Set function pointers */
@@ -41,7 +47,7 @@ Mapreduce* mr_sequential_create(const char *file_path,
 
     Mapreduce_sequential_ext *ext = malloc(sizeof(Mapreduce_sequential_ext));
     ext->wordstreamer = mr_wordstreamer_create_first(file_path, 1,
-                                                     wstreamer_type, profiling);
+                    wstreamer_type, reader_type, reader_buffer_size, profiling);
     ext->dictionary = mr_dictionary_create(profiling);
 
     mr->ext = ext;

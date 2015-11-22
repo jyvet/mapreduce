@@ -24,7 +24,7 @@
 
 void _stats_total(Mapreduce*);
 Mapreduce* _mr_create(const char*, const int, const mr_type, const ws_type,
-                                                        const bool, const bool);
+         const fr_type reader_type, const unsigned int, const bool, const bool);
 
 /* ========================= Constructor / Destructor ======================= */
 
@@ -37,7 +37,8 @@ Mapreduce* _mr_create(const char*, const int, const mr_type, const ws_type,
 Mapreduce* mr_create(Arguments *args) {
     assert(args != NULL);
     return _mr_create(args->file_path, args->nb_threads, args->type,
-                            args->wstreamer_type, args->quiet, args->profiling);
+                          args->wstreamer_type, args->freader_type,
+                          args->read_buffer_size, args->quiet, args->profiling);
 }
 
 
@@ -74,13 +75,19 @@ void mr_delete(Mapreduce **mr_ptr) {
  *
  * @param  file_path[in]    String containg the path to the file we want to read
  * @param  nb_threads[in]   Number of threads
- * @param  type[in]         Type of mapreduce to use
+ * @param  type[in]         Type of mapreduce to use (see common.h)
+ * @param  wstreamer_type[in]   Type of wordstreamer to use (see common.h)
+ * @param  reader_type[in]      Type of filereader to use (see common.h)
+ * @param  read_buffer_size[in] Size in bytes of the read buffer
  * @param  quiet[in]        Activate the quiet mode (no output)
  * @param  profiling[in]    Activate the profiling mode
- * @return  A Mapreduce structure
+ * @return  A pointer to the new Mapreduce structure
  */
 Mapreduce* _mr_create(const char *file_path, const int nb_threads,
-                               const mr_type type, const ws_type wstreamer_type,
+                                       const mr_type type,
+                                       const ws_type wstreamer_type,
+                                       const fr_type reader_type,
+                                       const unsigned int reader_buffer_size,
                                        const bool quiet, const bool profiling) {
     Mapreduce *mr;
 
@@ -88,11 +95,11 @@ Mapreduce* _mr_create(const char *file_path, const int nb_threads,
         default:
         case MR_PARALLEL :
             mr = mr_parallel_create(file_path, nb_threads, wstreamer_type,
-                                                              quiet, profiling);
+                             reader_type, reader_buffer_size, quiet, profiling);
             break;
         case MR_SEQUENTIAL :
-            mr = mr_sequential_create(file_path, wstreamer_type, quiet,
-                                                                     profiling);
+            mr = mr_sequential_create(file_path, wstreamer_type, reader_type,
+                                          reader_buffer_size, quiet, profiling);
             break;
     }
 

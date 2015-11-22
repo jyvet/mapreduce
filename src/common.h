@@ -15,6 +15,12 @@
     #define HEADER_MAPREDUCE_COMMON_H
 
     typedef enum {
+        FR_MMAP,             /* Filereader type: mmap                */
+        FR_READ,             /* Filereader type: read with buffer    */
+        FR_NB                /* Number of Filereader types           */
+    } fr_type;
+
+    typedef enum {
         WS_SCHUNKS,         /* Wordstreamer type: scattered chunks   */
         WS_IWORDS,          /* Wordstreamer type: interleaved words  */
         WS_NB               /* Number of Wordstreamer types          */

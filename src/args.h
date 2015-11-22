@@ -21,22 +21,24 @@
      * @brief  Structure which holds all provided arguments.
      */
     typedef struct arguments_s {
-        char*        file_path;      /**<  Path to the file to open           */
-        unsigned int nb_threads;     /**<  Number of threads to use           */
-        bool         profiling;      /**<  Profiling mode                     */
-        bool         quiet;          /**<  Display every details              */
-        ws_type      wstreamer_type; /**<  Type of wordstreamer (see common.h)*/
-        mr_type      type;           /**<  Type of mapreduce (see common.h)   */
+        char*        file_path;        /**<  Path to the file to open         */
+        unsigned int nb_threads;       /**<  Number of threads to use         */
+        unsigned int read_buffer_size; /**<  Size in bytes of the read buffer */
+        bool         profiling;        /**<  Profiling mode                   */
+        bool         quiet;            /**<  Display every details            */
+        fr_type      freader_type;     /**<  Type of filereader (see common.h)*/
+        ws_type      wstreamer_type;   /**<  Type of wordstreamer (common.h)  */
+        mr_type      type;             /**<  Type of mapreduce (see common.h) */
     } Arguments;
 
 
     /* ============================== Prototypes ============================ */
 
-    Arguments* mr_args_retrieve(int, char**);
-    Arguments* mr_args_create(int, char**);
-    void       mr_args_delete(Arguments**);
+    Arguments*  mr_args_retrieve(int, char**);
+    Arguments*  mr_args_create(int, char**);
+    void        mr_args_delete(Arguments**);
 
-    void _parse_arguments(int, char**, Arguments*);
-    void _check_arguments(Arguments*);
-    void _print_verbose(Arguments*);
+    void        _parse_arguments(int, char**, Arguments*);
+    void        _check_arguments(Arguments*);
+    void        _print_verbose(Arguments*);
 #endif

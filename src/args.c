@@ -20,6 +20,10 @@
 #include <argp.h>
 #include "args.h"
 
+/* Expand Macro values to string */
+#define STR_VALUE(var)   #var
+#define STR(var)         STR_VALUE(var)
+
 /* ============================= Static Elements ============================ */
 
 const char *argp_program_version = "MapReduce "MAPREDUCE_VERSION;
@@ -35,34 +39,50 @@ static char args_doc[] = "<file> <Nthreads>";
 
 /* The options we understand */
 static struct argp_option options[] = {
-    {"profiling", 'p', 0,  0, "Activate profiling"},
-    {"quiet",     'q', 0,  0, "Do not output results\n"},
-    {"parallel",   1,  0,  0, "Use mapreduce in parallel mode"
+    {"profiling",  'p', 0,       0, "Activate profiling"},
+    {"quiet",      'q', 0,       0, "Do not output results\n"},
+    {"parallel",     1, 0,       0, "Use mapreduce in parallel mode"
 #if MAPREDUCE_DEFAULT_TYPE == 0
                               " [default]"
 #endif
                               , 1},
-    {"sequential", 2,  0,  0, "Use mapreduce in sequential mode"
+    {"sequential",   2, 0,       0, "Use mapreduce in sequential mode"
 #if MAPREDUCE_DEFAULT_TYPE == 1
                               " [default]"
 #endif
                               "\n", 1},
+
+    {"mmap",    21,  0,  0, "Use filereader with mmap"
+#if MAPREDUCE_FR_DEFAULT_TYPE == 0
+                              " [default]"
+#endif
+                              , 2},
+    {"read",    22,  0,  0, "Use filereader with read"
+#if MAPREDUCE_FR_DEFAULT_TYPE == 1
+                              " [default]"
+#endif
+                               , 2},
+    {"read-buffer", 23, "BYTES", 0, "Size of the Buffer for filereader "
+                               "in read mode [default="
+                               STR(MAPREDUCE_FR_DEFAULT_READ_SIZE)"]\n", 2},
+
     {"iwords",    12,  0,  0, "Use wordstreamer with interleaved words"
 #if MAPREDUCE_WS_DEFAULT_TYPE == 1
                               " [default]"
 #endif
-                              , 2},
+                              , 3},
     {"schunks",   11,  0,  0, "Use wordstreamer with scattered chunks"
 #if MAPREDUCE_WS_DEFAULT_TYPE == 0
                               " [default]"
 #endif
-                              "\n", 2},
+                              "\n", 3},
     { 0 }
 };
 
 /* Parse a single option */
 static error_t parse_opt (int key, char *arg, struct argp_state *state) {
     Arguments *args = state->input;
+    unsigned int read_buffer_size;
 
     switch (key) {
         case 1:
@@ -76,6 +96,16 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
             break;
         case 12:
             args->wstreamer_type = WS_IWORDS;
+            break;
+        case 21:
+            args->freader_type = FR_MMAP;
+            break;
+        case 22:
+            args->freader_type = FR_READ;
+            break;
+        case 23:
+            read_buffer_size = atoi(arg);
+            if (read_buffer_size) args->read_buffer_size = read_buffer_size;
             break;
         case 'p':
             args->profiling = true;
@@ -159,10 +189,16 @@ Arguments* mr_args_create(int argc, char **argv) {
     assert(args != NULL);
 
     /* Initialize options with default values */
-    args->quiet            =   MAPREDUCE_DEFAULT_QUIET;
-    args->profiling        =   MAPREDUCE_DEFAULT_PROFILING;
-    args->wstreamer_type   =   MAPREDUCE_WS_DEFAULT_TYPE;
-    args->type             =   MAPREDUCE_DEFAULT_TYPE;
+    args->quiet              =   MAPREDUCE_DEFAULT_QUIET;
+    args->profiling          =   MAPREDUCE_DEFAULT_PROFILING;
+    args->freader_type       =   MAPREDUCE_FR_DEFAULT_TYPE;
+    args->read_buffer_size   =   MAPREDUCE_FR_DEFAULT_READ_SIZE;
+    args->wstreamer_type     =   MAPREDUCE_WS_DEFAULT_TYPE;
+    args->type               =   MAPREDUCE_DEFAULT_TYPE;
+
+    /* Initialize oother variables */
+    args->file_path        =   NULL;
+    args->nb_threads       =   1;
 
     return args;
 }
@@ -174,6 +210,7 @@ Arguments* mr_args_create(int argc, char **argv) {
  * @param   args_ptr[in]   Poiter to pointer of an Arguments structure
  */
 void mr_args_delete(Arguments** args_ptr) {
+    assert(args_ptr != NULL);
     Arguments* args = *args_ptr;
 
     if (args != NULL) {

@@ -1,0 +1,232 @@
+#!/bin/sh
+################################################################################
+# Copyright (C) 2015, Jean-Yves VET, contact [at] jean-yves [dot] vet          #
+#                                                                              #
+# This software is licensed as described in the file LICENCE, which you should #
+# have received as part of this distribution. You may opt to use, copy,        #
+# modify, merge, publish, distribute and/or sell copies of the Software, and   #
+# permit persons to whom the Software is furnished to do so, under the terms   #
+# of the LICENCE file.                                                         #
+#                                                                              #
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY    #
+# KIND, either express or implied.                                             #
+#                                                                              #
+##----[ DESCRIPTION ]---------------------------------------------------------##
+# A simple wrapper to provide cmake with:                                      #
+#             * a --help argument (similar to autotools)                       #
+#             * a more intuitive ./configure & make & make install procedure   #
+#                                                                              #
+##----[ ARGUMENTS ]-----------------------------------------------------------##
+#          -h, --help        :   Print help.                                   #
+#          --prefix=PREFIX   :   Install files in PREFIX [${PREFIX}]           #
+#          --enable-tests    :   Build also unit tests.                        #
+#          --enable-debug    :   Enable debug support.                         #
+#                                                                              #
+################################################################################
+
+
+##----[ GLOBAL VARIABLES ]----------------------------------------------------##
+
+    ENABLE_TESTS='false'
+    ENABLE_COLORS='false'
+    BUILD_DIR=$PWD
+    SOURCE_DIR="`dirname "$0"`"
+
+
+##----[ ERRORS ]--------------------------------------------------------------##
+
+    ERROR_MISSING_CMAKE="Cmake is not installed. Please install the package."
+    ERROR_INVALID_ARG="Please check --help. Invalid argument: "
+
+
+##----[ HELP MESSAGE ]--------------------------------------------------------##
+
+HELP="'configure' is a cmake wrapper. For a better control,
+prefer to use cmake directly.
+
+Usage: ./configure [OPTIONS]
+
+Configuration:
+   -h, --help           Display this help and exit
+
+Installation directory:
+   --prefix=PREFIX      Install files in PREFIX
+
+By default, 'make install' will install all the files 
+in '/usr/local'. You may specify another installation 
+prefix by using '--prefix' for instance :
+'--prefix=$HOME/usr/bin'.
+
+Optional Features:
+   --enable-tests       Build also unit tests.
+   --enable-debug       Enable debug support.
+   "
+
+
+##----[ FUNCTIONS ]-----------------------------------------------------------##
+
+    ############################################################################
+    # Print error in stderr.                                                   #
+    # Args:                                                                    #
+    #      -$1: Error code.                                                    #
+    # Result: Print error and quit.                                            #
+    print_error_and_stop()
+    {
+        # Extract argument
+        error_msg=${1}
+        error_arg=${2}
+
+        # Check if colors are enabled and display the error
+        if [ ${ENABLE_COLORS} = "true" ]; then
+            echo "\033[1;31mERROR:\033[0m \033[31m${error_msg}" \
+                 "${error_arg}\033[0m" 1>&2
+        else
+            echo "ERROR: ${error_msg}${arror_arg}" 1>&2
+        fi
+
+        exit 1
+    }
+
+
+    ############################################################################
+    # Check if Cmake is installed.                                             #
+    # Args:                                                                    #
+    #        None                                                              #
+    # Result: .                                                                #
+    check_cmake_install()
+    {
+        # Check if jq is installed
+        command -v cmake >/dev/null 2>&1 \
+                 || print_error_and_stop "${ERROR_MISSING_CMAKE}"
+    }
+
+
+    ############################################################################
+    # Check build and source directories.                                      #
+    # Args:                                                                    #
+    #        None                                                              #
+    # Result: .                                                                #
+    check_directories()
+    {
+        if [ "${SOURCE_DIR}" != "." ];
+        then
+            SOURCE_DIR=$(cd `dirname "$0"` && pwd)
+        else
+            SOURCE_DIR="${PWD}"
+        fi
+
+        # Avoid to build locally
+        if [ "${BUILD_DIR}" = "${SOURCE_DIR}" ];
+        then
+            #check if build directory exist
+            if [ ! -d "${PWD}/build" ];
+            then
+                mkdir -p build
+            fi
+            BUILD_DIR="${PWD}/build"
+            SOURCE_DIR="${PWD}"
+        fi
+    }
+
+
+    ############################################################################
+    # Check if we may activate colors.                                         #
+    # Args:                                                                    #
+    #        None                                                              #
+    # Result: .                                                                #
+    check_colors()
+    {
+        if [ -t 1 ]; then
+            ncolors=$(tput colors)
+            if test -n "$ncolors" && test $ncolors -ge 8; then
+                ENABLE_COLORS='true'
+            fi
+        fi
+    }
+
+
+    ############################################################################
+    # Parge all arguments.                                                     #
+    # Args:                                                                    #
+    #      -$*: All arguments.                                                 #
+    # Result: set configuration                                                #
+    parse_arguments()
+    {
+        for arg in "$@"
+        do
+            case "$arg" in
+                -h | --help)
+                    echo "${HELP}"
+                    exit 0
+                    ;;
+                --prefix=*)
+                    res=`echo "$arg" | sed -e "s/^--prefix=//g"`
+                    PARAM="-DCMAKE_INSTALL_PREFIX=${res}"
+                    ;;
+                --enable-debug)
+                    PARAM="${PARAM} -DDEBUG:BOOL=TRUE"
+                    ;;
+                --enable-tests)
+                    PARAM="${PARAM} -DBUILD_TESTS:BOOL=TRUE"
+                    ENABLE_TESTS='true'
+                    ;;
+                *)
+                    print_error_and_stop "${ERROR_INVALID_ARG}" "${arg}"
+			        ;;
+            esac
+        done
+    }
+
+
+    ############################################################################
+    # Execute cmake.                                                           #
+    # Args:                                                                    #
+    #        None                                                              #
+    # Result: .                                                                #
+    exec_cmake()
+    {
+		cd ${BUILD_DIR}
+		cmake ${PARAM} ${SOURCE_DIR}
+        cd ${SOURCE_DIR}
+    }
+
+
+    ############################################################################
+    # Generate Makefile to call the one created by cmake.                      #
+    # Args:                                                                    #
+    #        None                                                              #
+    # Result: .                                                                #
+    generate_makefile()
+    {
+cat > Makefile << EOF
+all:
+	@make --no-print-directory -C ${BUILD_DIR} all
+
+install:
+	@make --no-print-directory -C ${BUILD_DIR} install
+
+clean:
+	@make --no-print-directory -C ${BUILD_DIR} clean
+
+test:
+	@cd ${BUILD_DIR} && ctest
+
+distclean:
+	@rm -rf ${BUILD_DIR}
+	@rm -rf ${SOURCE_DIR}/bin
+	@rm ${SOURCE_DIR}/Makefile
+EOF
+    }
+
+
+##----[ MAIN ]----------------------------------------------------------------##
+
+    check_cmake_install
+    check_directories
+    check_colors
+
+    parse_arguments $*
+    exec_cmake
+    generate_makefile
+
+    exit $?

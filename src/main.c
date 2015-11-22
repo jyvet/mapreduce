@@ -21,6 +21,7 @@
 #include "mapreduce.h"
 
 int main(int argc, char **argv) {
+    /* Allocate Arguments and Mapreduce structures */
     Arguments* args = mr_args_retrieve(argc, argv);
     Mapreduce* mr = mr_create(args);
 

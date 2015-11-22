@@ -29,22 +29,25 @@
  * @param   file_path[in]     String containing the path to the file to read
  * @param   nb_streamers[in]  Total number of streamers
  * @param   type[in]          Type of Wordstreamer (see common.h)
+ * @param   reader_type[in]      Type of filereader to use (see common.h)
+ * @param   read_buffer_size[in] Size in bytes of the read buffer
  * @param   profiling[in]     Activate the profiling mode
  * @return  Pointer to the new Wordstreamer structure
  */
-Wordstreamer* mr_wordstreamer_create_first (const char* file_path,
-                   const int nb_streamers, const ws_type type, bool profiling) {
+Wordstreamer* mr_wordstreamer_create_first(const char* file_path,
+          const int nb_streamers, const ws_type type, const fr_type reader_type,
+                          const unsigned int read_buffer_size, bool profiling) {
     Wordstreamer *ws;
 
     switch(type) {
         default:
         case WS_IWORDS :
-            ws = mr_wordstreamer_iwords_create_first(file_path,
-                                                       nb_streamers, profiling);
+            ws = mr_wordstreamer_iwords_create_first(file_path, nb_streamers,
+                                      reader_type, read_buffer_size, profiling);
             break;
         case WS_SCHUNKS :
             ws = mr_wordstreamer_schunks_create_first(file_path, nb_streamers,
-                                                                     profiling);
+                                      reader_type, read_buffer_size, profiling);
             break;
     }
 
@@ -56,7 +59,7 @@ Wordstreamer* mr_wordstreamer_create_first (const char* file_path,
  * Constructor for each other streamer.
  *
  * @param   first[in]        String containing the path to the file to read
- * @param   streamer_id[in]  Total number of streamers
+ * @param   streamer_id[in]  Id of the current wordstreamer
  * @return  Pointer to the new Wordstreamer structure
  */
 Wordstreamer* mr_wordstreamer_create_another(const Wordstreamer* first,
@@ -78,25 +81,4 @@ void mr_wordstreamer_delete(Wordstreamer **ws_ptr) {
 
     /* Set pointer to NULL */
     *ws_ptr = NULL;
-}
-
-
-/* ============================= Public functions =========================== */
-
-/**
- * Get next word from a wordstreamer. Return 1 if end of stream reached.
- *
- * @param   ws[in]               Pointer to the Wordstreamer structure
- * @param   shared_map[inout]    Buffer to hold the retrieved word
- * @return  0 if a word was copied into the buffer or 1 if the end of the stream
- *          was reached
- */
-int mr_wordstreamer_get(Wordstreamer *ws, char *buffer) {
-    assert(ws != NULL);
-
-    _timer_start(&ws->timer_get);
-    int ret = ws->get(ws, buffer);
-    _timer_stop(&ws->timer_get);
-
-    return ret;
 }

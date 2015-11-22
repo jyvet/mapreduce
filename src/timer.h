@@ -22,9 +22,9 @@
      * @brief  Structure containing timing information (used in Profiling mode).
      */
     typedef struct timer_s {
-        long long        elapsed;      /**<  Elapsed time (in micro second) */
-        struct timeval   start;        /**<  Start time                     */
-        bool             profiling;    /**<  Profiling mode                 */
+        long long        elapsed;      /**<  Elapsed time (in micro seconds)  */
+        struct timeval   start;        /**<  Start time                       */
+        bool             profiling;    /**<  Profiling mode                   */
     } Timer;
 
 

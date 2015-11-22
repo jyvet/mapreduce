@@ -12,8 +12,9 @@
 *******************************************************************************/
 
 #include <check.h>
-#include "mapreduce_sequential.h"
+#include "filereader_read.h"
 
+#define MAX_READERS 11
 
 void create_file(const char *filename, const char *content) {
     FILE *fp;
@@ -32,12 +33,10 @@ START_TEST (test_create_delete)
     char *content = "content tests";
     create_file(filename, content);
 
-    Mapreduce *mr = mr_sequential_create(filename, WS_SCHUNKS, FR_MMAP, 4096,
-                                                                   true, false);
+    Filereader *fr = mr_filereader_read_create_first(filename, 4096);
+    ck_assert(fr != NULL);
 
-    ck_assert(mr != NULL);
-
-    mr_sequential_delete(mr);
+    mr_filereader_read_delete(fr);
 
     /* Delete testfile */
     remove(filename);
@@ -45,8 +44,12 @@ START_TEST (test_create_delete)
 END_TEST
 
 
-START_TEST (test_mapreduce)
+START_TEST (test_multiple_readers)
 {
+    int i, j;
+    char buffer_byte;
+    char buffer[4096];
+
     /* Create test file */
     char *filename = "ws_test.txt";
     char *content = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. "
@@ -70,41 +73,67 @@ START_TEST (test_mapreduce)
 
     create_file(filename, content);
 
-    Mapreduce *mr = mr_sequential_create(filename, WS_SCHUNKS, FR_MMAP, 4096,
-                                                                   true, false);
-    ck_assert(mr != NULL);
+    /* Check several combinations */
+    for (i=1; i<=MAX_READERS; i++) {
+        int buffer_index = 0;
+        Filereader *fr[MAX_READERS];
 
-    ck_assert(mr->ext != NULL);
-    Mapreduce_sequential_ext *ext = (Mapreduce_sequential_ext *) mr->ext;
+        /* Create first reader */
+        fr[0] = mr_filereader_read_create_first(filename, 4096);
+        ck_assert(fr[0] != NULL);
 
-    ck_assert(ext->dictionary != NULL);
-    Dictionary *dico = ext->dictionary;
+        /* Create other readers */
+        for (j=1; j<i; j++) {
+            fr[j] = mr_filereader_read_create_another(fr[0]);
+            ck_assert(fr[j] != NULL);
+        }
 
-    /* Perform map and reduce */
-    mr_sequential_map(mr);
-    mr_sequential_reduce(mr);
+        size_t file_size = fr[0]->file_size;
+        long long chunk_size = file_size/i;
+        long long chunk_rest = file_size%i;
 
-    /* Check some occurences */
-    ck_assert_int_eq(mr_dictionary_count_word(dico, "adipiscing"), 3);
-    ck_assert_int_eq(mr_dictionary_count_word(dico, "consectetur"), 4);
-    ck_assert_int_eq(mr_dictionary_count_word(dico, "amet"), 5);
-    ck_assert_int_eq(mr_dictionary_count_word(dico, "pharetra"), 1);
-    ck_assert_int_eq(mr_dictionary_count_word(dico, "sit"), 5);
-    ck_assert_int_eq(mr_dictionary_count_word(dico, "viverra"), 2);
+        /* Initialize offsets */
+        for (j=0; j<i; j++) {
+            long long start_offset = j*chunk_size;
+            long long end_offset = (j+1)*chunk_size-1;
 
-    mr_sequential_delete(mr);
+            if (j==i-1) {
+                end_offset += chunk_rest;
+            }
+
+            mr_filereader_read_set_offsets(fr[j], start_offset, end_offset);
+        }
+
+        /* Retrieve bytes */
+        for (j=0; j<i; j++) {
+            while(!mr_filereader_read_get_byte(fr[j], &buffer_byte)) {
+                buffer[buffer_index++] = buffer_byte;
+            }
+        }
+        buffer[buffer_index] = '\0';
+
+        /* Check some occurences */
+        ck_assert_str_eq(buffer, content);
+
+
+        /* Delete all readers */
+        for (j=0; j<i; j++) {
+            mr_filereader_read_delete(fr[j]);
+        }
+    }
+
     remove(filename);
 }
 END_TEST
 
 
-Suite *mapreduce_suite(void) {
-    Suite *suite = suite_create("Mapreduce sequential");
+Suite *filereader_suite(void) {
+    Suite *suite = suite_create("Filereader Read");
     TCase *tcase1 = tcase_create("Case Create Delete");
-    TCase *tcase2 = tcase_create("Case MapReduce");
+    TCase *tcase2 = tcase_create("Case Multiple Readers");
 
     tcase_add_test(tcase1, test_create_delete);
-    tcase_add_test(tcase2, test_mapreduce);
+    tcase_add_test(tcase2, test_multiple_readers);
 
     suite_add_tcase(suite, tcase1);
     suite_add_tcase(suite, tcase2);
@@ -115,7 +144,7 @@ Suite *mapreduce_suite(void) {
 
 int main(void) {
     int number_failed;
-    Suite *suite = mapreduce_suite();
+    Suite *suite = filereader_suite();
     SRunner *runner = srunner_create(suite);
 
     srunner_run_all(runner, CK_NORMAL);
