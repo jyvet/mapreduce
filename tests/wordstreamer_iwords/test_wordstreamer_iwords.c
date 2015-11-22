@@ -33,12 +33,12 @@ START_TEST (test_create_delete)
     char *content = "content tests";
     create_file(filename, content);
 
-    Wordstreamer *ws = mr_wordstreamer_iwords_create_first(filename, 1, false);
+    Wordstreamer *ws = mr_wordstreamer_iwords_create_first(filename, 1, FR_MMAP,
+                                                                   4096, false);
     ck_assert(ws != NULL);
 
     ck_assert_int_eq(ws->nb_streamers, 1);
     ck_assert_int_eq(ws->streamer_id, 0);
-    ck_assert_int_eq(ws->start_offset, 0);
     ck_assert_int_eq(ws->profiling, 0);
 
     mr_wordstreamer_iwords_delete(ws);
@@ -56,7 +56,8 @@ START_TEST (test_singlestreamer_get)
     char *content = ".Donec!, ut  libero sed. ";
     create_file(filename, content);
 
-    Wordstreamer *ws = mr_wordstreamer_iwords_create_first(filename, 1, false);
+    Wordstreamer *ws = mr_wordstreamer_iwords_create_first(filename, 1, FR_MMAP,
+                                                                   4096, false);
     ck_assert(ws != NULL);
 
     char buffer[32];
@@ -117,7 +118,7 @@ START_TEST (test_multiplestreamer_get)
 
     /* Sequential streamer as a reference */
     Wordstreamer *ws_ref = mr_wordstreamer_iwords_create_first(filename, 1,
-                                                                         false);
+                                                          FR_MMAP, 4096, false);
     ck_assert(ws_ref != NULL);
     char ref[4096];
     char word[128];
@@ -139,7 +140,8 @@ START_TEST (test_multiplestreamer_get)
 
         /* Create streamers */
         Wordstreamer **ws = malloc(sizeof(Wordstreamer)*i);
-        ws[0] = mr_wordstreamer_iwords_create_first(filename, i, false);
+        ws[0] = mr_wordstreamer_iwords_create_first(filename, i, FR_MMAP,
+                                                                   4096, false);
         ck_assert(ws[0] != NULL);
 
         for(s=1; s<i; s++) {

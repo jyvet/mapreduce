@@ -27,12 +27,16 @@
  *
  * @param  file_path[in]    String containg the path to the file we want to read
  * @param  nb_threads[in]   Number of threads to use
+ * @param  wstreamer_type[in]   Type of wordstreamer to use
+ * @param  reader_type[in]      Type of filereader to use
+ * @param  read_buffer_size[in] Size in bytes of the read buffer
  * @param  quiet[in]        Activate the quiet mode (no output)
  * @param  profiling[in]    Activate the profiling mode
  * @return  A Mapreduce structure
  */
 Mapreduce* mr_parallel_create(const char *file_path,
                     const unsigned int nb_threads, const ws_type wstreamer_type,
+                     const fr_type reader_type, unsigned int reader_buffer_size,
                                        const bool quiet, const bool profiling) {
     int i;
     Mapreduce *mr = _mr_common_create(file_path, nb_threads, MR_PARALLEL,
@@ -48,7 +52,7 @@ Mapreduce* mr_parallel_create(const char *file_path,
 
     /* First thread */
     threads[0].wordstreamer = mr_wordstreamer_create_first(file_path,
-                                         nb_threads, wstreamer_type, profiling);
+        nb_threads, wstreamer_type, reader_type, reader_buffer_size, profiling);
     threads[0].dictionary = mr_dictionary_create(profiling);
     threads[0].thread = malloc(sizeof(pthread_t));
     assert(threads[0].thread != NULL);

@@ -25,9 +25,10 @@ ADD_EXECUTABLE(mapred main.c
                       word.c
                       filereader.c
                       filereader_mmap.c
+                      filereader_read.c
                       wordstreamer.c
                       wordstreamer_schunks.c
-                      #wordstreamer_iwords.c
+                      wordstreamer_iwords.c
                       dictionary.c
                       mapreduce.c
                       mapreduce_sequential.c

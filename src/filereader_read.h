@@ -11,18 +11,30 @@
 * KIND, either express or implied.                                             *
 *******************************************************************************/
 
-#ifndef HEADER_MAPREDUCE_WORDSTREAMER_SCHUNKS_H
-    #define HEADER_MAPREDUCE_WORDSTREAMER_SCHUNKS_H
+#ifndef HEADER_MAPREDUCE_FILEREADER_READ_H
+    #define HEADER_MAPREDUCE_FILEREADER_READ_H
 
-    #include "wordstreamer.h"
+    #include "filereader.h"
+
+    /**
+     * @struct filereader_mmap_s
+     * @brief  Structure containing extra data for filereader_read.
+     */
+    typedef struct filereader_read_s {
+        int         buffer_size;      /**<  Buffer size                   */
+        int         buffer_offset;    /**<  Offset of the next character  */
+        char*       buffer;           /**<  Pointer to the read Buffer    */
+    } Filereader_read;
 
     /* ============================== Prototypes ============================ */
 
-    Wordstreamer*  mr_wordstreamer_schunks_create_first(const char*, const int,
-                                       const fr_type, const unsigned int, bool);
-    Wordstreamer*  mr_wordstreamer_schunks_create_another(const Wordstreamer*,
-                                                                     const int);
-    void           mr_wordstreamer_schunks_delete(Wordstreamer*);
+    Filereader*  mr_filereader_read_create_first(const char*,
+                                                            const unsigned int);
+    Filereader*  mr_filereader_read_create_another(const Filereader*);
+    void         mr_filereader_read_delete(Filereader*);
 
-    int            mr_wordstreamer_schunks_get(Wordstreamer*, char*);
+    int          mr_filereader_read_get_byte(Filereader*, char*);
+    void         mr_filereader_read_set_offsets(Filereader*, long long,
+                                                                     long long);
+
 #endif

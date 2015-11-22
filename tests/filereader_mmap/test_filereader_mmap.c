@@ -33,7 +33,7 @@ START_TEST (test_create_delete)
     char *content = "content tests";
     create_file(filename, content);
 
-    Filereader *fr = mr_filereader_mmap_create_first(filename, false);
+    Filereader *fr = mr_filereader_mmap_create_first(filename);
     ck_assert(fr != NULL);
 
     mr_filereader_mmap_delete(fr);
@@ -79,12 +79,12 @@ START_TEST (test_multiple_readers)
         Filereader *fr[MAX_READERS];
 
         /* Create first reader */
-        fr[0] = mr_filereader_mmap_create_first(filename, false);
+        fr[0] = mr_filereader_mmap_create_first(filename);
         ck_assert(fr[0] != NULL);
 
         /* Create other readers */
         for (j=1; j<i; j++) {
-            fr[j] = mr_filereader_mmap_create_another(fr[0], j);
+            fr[j] = mr_filereader_mmap_create_another(fr[0]);
             ck_assert(fr[j] != NULL);
         }
 

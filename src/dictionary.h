@@ -43,7 +43,6 @@
         Bucket*       hash_tab;   /**<  Array of buckets                      */
         bool          profiling;  /**<  Profiling mode                        */
         Timer         timer_put;  /**<  Timer for put func. [Profiling mode]  */
-        Timer         timer_hash; /**<  Timer for hash func. [Profiling mode] */
     } Dictionary;
 
 

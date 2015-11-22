@@ -19,9 +19,10 @@
  */
 
 #include "wordstreamer_schunks.h"
+#include "filereader_read.h"
 
-Wordstreamer* _mr_wordstreamer_schunks_create(const char*, Filereader*,
-                                              const int, const int, const bool);
+Wordstreamer* _mr_wordstreamer_schunks_create(const char*, const fr_type,
+             Filereader*, const unsigned int, const int, const int, const bool);
 
 /* ========================= Constructor / Destructor ======================= */
 
@@ -30,14 +31,17 @@ Wordstreamer* _mr_wordstreamer_schunks_create(const char*, Filereader*,
  *
  * @param   file_path[in]     String containing the path to the file to read
  * @param   nb_streamers[in]  Total number of streamers
+ * @param   reader_type[in]   Type of filereader to use (see common.h)
+ * @param   read_buffer_size[in] Size in bytes of the read buffer
  * @param   profiling[in]     Activate the profiling mode
  * @return  Pointer to the new Wordstreamer structure
  */
 Wordstreamer* mr_wordstreamer_schunks_create_first(const char* file_path,
-                                       const int nb_streamers, bool profiling) {
+                          const int nb_streamers, const fr_type reader_type,
+                          const unsigned int read_buffer_size, bool profiling) {
 
-    return _mr_wordstreamer_schunks_create(file_path, NULL, 0,
-                                                       nb_streamers, profiling);
+    return _mr_wordstreamer_schunks_create(file_path, reader_type, NULL,
+                                  read_buffer_size, 0, nb_streamers, profiling);
 }
 
 
@@ -50,16 +54,27 @@ Wordstreamer* mr_wordstreamer_schunks_create_first(const char* file_path,
  */
 Wordstreamer* mr_wordstreamer_schunks_create_another(const Wordstreamer* first,
                                                         const int streamer_id) {
+    unsigned int read_buffer_size = 0;
+    assert(first != NULL);
+    Filereader *fr = first->filereader;
 
-    return _mr_wordstreamer_schunks_create("", first->filereader, streamer_id,
-                                         first->nb_streamers, first->profiling);
+    if (fr->type == FR_READ) {
+        Filereader_read *ext = fr->ext;
+        assert(ext);
+
+        read_buffer_size = ext->buffer_size;
+    }
+
+    return _mr_wordstreamer_schunks_create("", first->reader_type,
+                            first->filereader, read_buffer_size,
+                            streamer_id, first->nb_streamers, first->profiling);
 }
 
 
 /**
  * Delete a Wordstreamer structure.
  *
- * @param   ws_ptr[in]   Pointer to the Wordstreamer structure
+ * @param   ws[in]   Pointer to the Wordstreamer structure
  */
 void  mr_wordstreamer_schunks_delete(Wordstreamer* ws) {
     _mr_wordstreamer_common_delete(ws);
@@ -72,17 +87,21 @@ void  mr_wordstreamer_schunks_delete(Wordstreamer* ws) {
  * Internal constructor for Wordstreamer_schunks.
  *
  * @param   file_path[in]     String containing the path to the file to read
- * @param   shared_map[in]    Pointer to area where the file was mmaped
+ * @param   reader_type[in]   Type of filereader to use (see common.h)
+ * @param   first_reader[in]  Pointer to the first reader
+ * @param   read_buffer_size[in] Size in bytes of the read buffer
  * @param   streamer_id[in]   Id of the current wordstreamer
  * @param   nb_streamers[in]  Total number of streamers
  * @param   profiling[in]     Activate the profiling mode
  * @return  Pointer to the new Wordstreamer structure
  */
 Wordstreamer* _mr_wordstreamer_schunks_create(const char* file_path,
-                                Filereader *first_reader, const int streamer_id,
+                     const fr_type reader_type, Filereader *first_reader,
+                     const unsigned int read_buffer_size, const int streamer_id,
                                  const int nb_streamers, const bool profiling) {
 
-    Wordstreamer *ws = _mr_wordstreamer_common_create(file_path, first_reader,
+    Wordstreamer *ws = _mr_wordstreamer_common_create(file_path, reader_type,
+                                          first_reader, read_buffer_size,
                                           streamer_id, nb_streamers, profiling);
 
     /* Set function pointers */
@@ -109,13 +128,12 @@ Wordstreamer* _mr_wordstreamer_schunks_create(const char* file_path,
 
 
 /**
- * Remove non-word characters to stream.
+ * Remove non-word characters to the stream.
  *
- * @param   ws[inout]          Pointer to the Wordstreamer structure
- * @param   file_size[in]      Size in Bytes of the input file
- * @param   start_offset[in]   Start offset of the current chunk in Bytes
- * @param   streamer_id[in]    Id of the current wordstreamer
- * @param   shared_map[in]     Pointer to area where the file was mmaped
+ * @param   fr[inout]            Pointer to the filereader
+ * @param   character_ptr[in]    Pointer to the last character retrieved
+ * @param   ret_ptr[in]          Pointer to the last returned value
+  * @param  streamer_id[in]      Id of the current streamer
  */
 static inline void _mr_wordstreamer_schunks_remove_nonwords(Filereader *fr,
                            char *character_ptr, int *ret_ptr, int streamer_id) {
@@ -147,11 +165,11 @@ static inline void _mr_wordstreamer_schunks_remove_nonwords(Filereader *fr,
 /**
  * Retrieve a word.
  *
- * @param   ws[inout]          Pointer to the Wordstreamer structure
- * @param   file_size[in]      Size in Bytes of the input file
- * @param   buffer[out]        Buffer to hold the retrieved word
- * @param   streamer_id[in]    Id of the current wordstreamer
- * @param   shared_map[in]     Pointer to area where the file was mmaped
+ * @param   fr[inout]            Pointer to the filereader
+ * @param   character_ptr[in]    Pointer to the last character retrieved
+ * @param   ret_ptr[in]          Pointer to the last returned value
+ * @param   streamer_id[in]      Id of the current wordstreamer
+ * @param   buffer[out]          Buffer to hold the retrieved word
  */
 static inline void _mr_wordstreamer_schunks_retrieve_word(Filereader *fr,
              char *character_ptr, int *ret_ptr, int streamer_id, char *buffer) {
@@ -182,8 +200,8 @@ static inline void _mr_wordstreamer_schunks_retrieve_word(Filereader *fr,
 /**
  * Get next word from a wordstreamer. Return 1 if end of stream reached.
  *
- * @param   ws[in]               Pointer to the Wordstreamer structure
- * @param   shared_map[out]      Buffer to hold the retrieved word
+ * @param   ws[in]           Pointer to the Wordstreamer structure
+ * @param   buffer[out]      Buffer to hold the retrieved word
  * @return  0 if a word was copied into the buffer or 1 if the end of the stream
  *          was reached
  */

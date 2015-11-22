@@ -33,7 +33,8 @@ START_TEST (test_create_delete)
     char *content = "content tests";
     create_file(filename, content);
 
-    Wordstreamer *ws = mr_wordstreamer_schunks_create_first(filename, 1, false);
+    Wordstreamer *ws = mr_wordstreamer_schunks_create_first(filename, 1,
+                                                          FR_MMAP, 4096, false);
     ck_assert(ws != NULL);
 
     ck_assert_int_eq(ws->nb_streamers, 1);
@@ -55,7 +56,8 @@ START_TEST (test_singlestreamer_get)
     char *content = ".Donec!, ut  libero sed. ";
     create_file(filename, content);
 
-    Wordstreamer *ws = mr_wordstreamer_schunks_create_first(filename, 1, false);
+    Wordstreamer *ws = mr_wordstreamer_schunks_create_first(filename, 1,
+                                                          FR_MMAP, 4096, false);
     ck_assert(ws != NULL);
 
     char buffer[32];
@@ -115,7 +117,8 @@ START_TEST (test_multiplestreamer_get)
     create_file(filename, content);
 
     /* Sequential streamer as a reference */
-    Wordstreamer *ws = mr_wordstreamer_schunks_create_first(filename, 1, false);
+    Wordstreamer *ws = mr_wordstreamer_schunks_create_first(filename, 1,
+                                                          FR_MMAP, 4096, false);
     ck_assert(ws != NULL);
 
     char ref[4096];
@@ -135,7 +138,7 @@ START_TEST (test_multiplestreamer_get)
         int s;
         char comp[4096];
         Wordstreamer *first_ws = mr_wordstreamer_schunks_create_first(filename,
-                                                                      i, false);
+                                                       i, FR_MMAP, 4096, false);
         ck_assert(first_ws != NULL);
 
         if (!mr_wordstreamer_schunks_get(first_ws, word)) strcpy(comp, word);

@@ -16,8 +16,11 @@ SET(LIBS ${LIBS} ${CHECK_LIBRARIES})
 INCLUDE_DIRECTORIES(. ${CMAKE_CURRENT_SOURCE_DIR}/../../src)
 
 ADD_EXECUTABLE(${TEST_NAME} ${SRC_PATH}/${NAME}.c ${TEST_NAME}.c
+               ${SRC_PATH}/filereader.c
+               ${SRC_PATH}/filereader_mmap.c
+               ${SRC_PATH}/filereader_read.c
                ${SRC_PATH}/tools.c)
-			
+
 TARGET_LINK_LIBRARIES(${TEST_NAME} ${LIBS} pthread)
 
 ADD_TEST(NAME ${TEST_NAME} COMMAND ${TEST_NAME})

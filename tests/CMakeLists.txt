@@ -7,6 +7,8 @@ SET(CMAKE_C_FLAGS "-g -Wall -std=gnu99")
 # Subdirectories
 ADD_SUBDIRECTORY(args)
 ADD_SUBDIRECTORY(word)
+ADD_SUBDIRECTORY(filereader_mmap)
+ADD_SUBDIRECTORY(filereader_read)
 ADD_SUBDIRECTORY(wordstreamer_schunks)
 ADD_SUBDIRECTORY(wordstreamer_iwords)
 ADD_SUBDIRECTORY(buffalloc)

@@ -19,7 +19,7 @@
 
     /**
      * @struct mapreduce_s
-     * @brief  Structure containing information to manage mapreduce operations
+     * @brief  Structure containing information to manage mapreduce operations.
      */
     typedef struct mapreduce_s {
         void          (*map)();     /**<  Pointer to impl. of map function    */
@@ -40,14 +40,15 @@
     /* =========================== Static Elements ========================== */
 
     /**
-     * Common constructor for implementations of Mapreduce.
+     * Common constructor for implementations of Mapreduce. Static inline
+     * definition to avoid to compile mapreduce.c when using an implemention.
      *
      * @param   file_path[in]     String containing the path to the file to read
      * @param   nb_threads[in]    Total number of threads
      * @param   type[in]          Type of mapreduce (see common.h)
      * @param   quiet[in]         Activate the quiet mode (no output)
      * @param   profiling[in]     Activate the profiling mode
-     * @return  Pointer to the new Wordstreamer structure
+     * @return  Pointer to the new mapreduce structure
      */
     static inline Mapreduce* _mr_common_create(const char *file_path,
                                        const int nb_threads, const mr_type type,
@@ -60,8 +61,9 @@
         mr->nb_threads = nb_threads;
         mr->type = type;
         mr->quiet = quiet;
-        mr->profiling = profiling;
 
+        /* Initialize variables for profiling */
+        mr->profiling = profiling;
         _timer_init(&mr->timer_map, profiling);
         _timer_init(&mr->timer_reduce, profiling);
         _timer_init(&mr->timer_global, profiling);

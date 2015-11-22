@@ -36,7 +36,6 @@ Dictionary *mr_dictionary_create(bool profiling) {
     /* Initialize variables for profiling */
     dico->profiling = profiling;
     _timer_init(&dico->timer_put, dico->profiling);
-    _timer_init(&dico->timer_hash, dico->profiling);
 
     dico->hash_size = HASH_SIZE;
 
@@ -68,7 +67,6 @@ void mr_dictionary_delete(Dictionary **ptr_dico) {
     Dictionary *dico = *ptr_dico;
 
     /* Display time info if requiered [Profiling mode] */
-    _timer_print(&dico->timer_hash, "[Dictionary] hash function");
     _timer_print(&dico->timer_put, "[Dictionary] put");
 
     if (dico != NULL) {
@@ -109,7 +107,6 @@ void mr_dictionary_delete(Dictionary **ptr_dico) {
  * @return  hash code
  */
 unsigned int _mr_dictionary_hash(Dictionary *dico, const char *word) {
-    _timer_start(&dico->timer_hash);
     unsigned int word_length = strlen(word);
     unsigned int hash;
 
@@ -119,8 +116,6 @@ unsigned int _mr_dictionary_hash(Dictionary *dico, const char *word) {
     } else {
         hash = (unsigned char)word[0]*HASH_CHAR_SIZE;
     }
-
-    _timer_stop(&dico->timer_hash);
 
     return hash;
 }

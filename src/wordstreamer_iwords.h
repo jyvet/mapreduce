@@ -19,7 +19,7 @@
     /* ============================== Prototypes ============================ */
 
     Wordstreamer*  mr_wordstreamer_iwords_create_first(const char*,
-                                                               const int, bool);
+                            const int, const fr_type, const unsigned int, bool);
     Wordstreamer*  mr_wordstreamer_iwords_create_another(const Wordstreamer*,
                                                                      const int);
     void           mr_wordstreamer_iwords_delete(Wordstreamer*);

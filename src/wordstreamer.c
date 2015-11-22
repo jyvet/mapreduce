@@ -19,7 +19,7 @@
 
 #include "wordstreamer.h"
 #include "wordstreamer_schunks.h"
-//#include "wordstreamer_iwords.h"
+#include "wordstreamer_iwords.h"
 
 /* ========================= Constructor / Destructor ======================= */
 
@@ -29,22 +29,25 @@
  * @param   file_path[in]     String containing the path to the file to read
  * @param   nb_streamers[in]  Total number of streamers
  * @param   type[in]          Type of Wordstreamer (see common.h)
+ * @param   reader_type[in]      Type of filereader to use (see common.h)
+ * @param   read_buffer_size[in] Size in bytes of the read buffer
  * @param   profiling[in]     Activate the profiling mode
  * @return  Pointer to the new Wordstreamer structure
  */
 Wordstreamer* mr_wordstreamer_create_first(const char* file_path,
-                   const int nb_streamers, const ws_type type, bool profiling) {
+          const int nb_streamers, const ws_type type, const fr_type reader_type,
+                          const unsigned int read_buffer_size, bool profiling) {
     Wordstreamer *ws;
 
     switch(type) {
         default:
-        //case WS_IWORDS :
-            //ws = mr_wordstreamer_iwords_create_first(file_path,
-            //                                           nb_streamers, profiling);
-            //break;
+        case WS_IWORDS :
+            ws = mr_wordstreamer_iwords_create_first(file_path, nb_streamers,
+                                      reader_type, read_buffer_size, profiling);
+            break;
         case WS_SCHUNKS :
             ws = mr_wordstreamer_schunks_create_first(file_path, nb_streamers,
-                                                                     profiling);
+                                      reader_type, read_buffer_size, profiling);
             break;
     }
 

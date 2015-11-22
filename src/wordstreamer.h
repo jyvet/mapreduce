@@ -31,18 +31,11 @@
      *         parallel.
      */
     struct wordstreamer_s {
-        int          (*get)();
-        void         (*delete)();
-        Wordstreamer* (*create_another)();
-        Filereader*  filereader;
-        //char*        shared_map;   /**<  Memory area where the file is mapped */
-        //char*        file_path;    /**<  String for the path to the file      */
-        //long long    file_size;    /**<  File size in Bytes                   */
-        //long long    start_offset; /**<  Start offset for the Wordstreamer    */
-        //long long    stop_offset;  /**<  End offset for the Wordstreamer      */
-        long long    chunk_size;   /**<  Chunk size for the Wordstreamer      */
-        //long long    offset;       /**<  Offset index for the next character  */
-        //int          fd;           /**<  File descriptor                      */
+        int          (*get)();              /**<  Pointer to impl. of get     */
+        void         (*delete)();           /**<  Pointer to impl. of delete  */
+        Wordstreamer* (*create_another)();  /**<  Pointer to impl.            */
+        Filereader*  filereader;   /**<  Pointer to a filereader              */
+        fr_type      reader_type;  /**<  Type of filereader (see common.h)    */
         unsigned int streamer_id;  /**<  Id of the current Wordstreamer       */
         unsigned int nb_streamers; /**<  Total number of streamers            */
         Timer        timer_get;    /**<  Timer for get func. [Profiling mode] */
@@ -54,18 +47,24 @@
     /* =========================== Static Elements ========================== */
 
     /**
-     * Common constructor for implementations of Wordstreamer.
+     * Common constructor for implementations of Wordstreamer. Static inline
+     * definition to avoid to compile wordstreamer.c when using an implemention.
      *
+
      * @param   file_path[in]     String containing the path to the file to read
-     * @param   shared_map[in]    Pointer to area where the file was mmaped
-     * @param   streamer_id[in]   Id of the current wordstreamer
-     * @param   nb_streamers[in]  Total number of streamers
-     * @param   profiling[in]     Activate the profiling mode
+     * @param   reader_type[in]      Type of filereader to use (see common.h)
+     * @param   first_reader[in]     Pointer to first filereader structure
+     * @param   read_buffer_size[in] Size in bytes of the read buffer
+     * @param   streamer_id[in]      Id of the current streamer
+     * @param   nb_streamers[in]     Total number of streamers
+     * @param   profiling[in]        Activate the profiling mode
      * @return  Pointer to the new Wordstreamer structure
      */
     static inline Wordstreamer* _mr_wordstreamer_common_create(
-          const char *file_path, Filereader *first_reader, const int streamer_id,
-                                       const int nb_streamers, bool profiling) {
+                const char *file_path, fr_type reader_type,
+                Filereader *first_reader, const unsigned int read_buffer_size,
+                const int streamer_id, const int nb_streamers, bool profiling) {
+
         assert(nb_streamers != 0
                && streamer_id < nb_streamers
                && file_path != NULL);
@@ -79,14 +78,15 @@
         _timer_init(&ws->timer_get, ws->profiling);
 
         /* Initialize other variables */
+        ws->reader_type = reader_type;
         ws->streamer_id = streamer_id;
         ws->nb_streamers = nb_streamers;
         ws->end = false;
 
         /* If streamer_id = 0, create first filereader */
         if (streamer_id == 0) {
-            ws->filereader = mr_filereader_create_first(file_path, FR_MMAP,
-                                                                     profiling);
+            ws->filereader = mr_filereader_create_first(file_path, reader_type,
+                                                              read_buffer_size);
         } else {
             assert(first_reader != NULL);
             ws->filereader = mr_filereader_create_another(first_reader);
@@ -97,7 +97,8 @@
 
 
     /**
-     * Common destructor for implementations of Wordstreamer.
+     * Common destructor for implementations of Wordstreamer. Static inline
+     * definition to avoid to compile wordstreamer.c when using an implemention.
      *
      * @param   ws[inout]     Pointer to the Wordstreamer structure
      */
@@ -123,11 +124,12 @@
 
     /**
      * Get next word from a wordstreamer. Return 1 if end of stream reached.
+     * Static inline definition to improve calling performance.
      *
      * @param   ws[in]               Pointer to the Wordstreamer structure
      * @param   buffer[inout]        Buffer to hold the retrieved word
-     * @return  0 if a word was copied into the buffer or 1 if the end of the stream
-     *          was reached
+     * @return  0 if a word was copied into the buffer or 1 if the end of the
+     *          stream was reached
      */
     static inline int mr_wordstreamer_get(Wordstreamer *ws, char *buffer) {
         _timer_start(&ws->timer_get);
@@ -141,7 +143,7 @@
     /* ============================== Prototypes ============================ */
 
     Wordstreamer*  mr_wordstreamer_create_first(const char*, const int,
-                                                           const ws_type, bool);
+                        const ws_type, const fr_type, const unsigned int, bool);
     Wordstreamer*  mr_wordstreamer_create_another(const Wordstreamer*,
                                                                      const int);
 
