@@ -89,8 +89,8 @@ void mr_word_delete(Word **word_ptr) {
  * @param   length[in]      Number of characters in the word
  */
 void _mr_word_init(Word* word, const char *src_word, const int length) {
-    /* Map the pointer of the string to the last element of the structure */
-    word->name = (char*)&word->_name;
+    /* Map the pointer of the string just after the structure */
+    word->name = (char*)(word+1);
 
     /* Copy the word spelling in the structure */
     strcpy(word->name, src_word);

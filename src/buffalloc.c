@@ -70,12 +70,12 @@ void mr_buffalloc_delete(Buffalloc **ba_ptr) {
  * @return  Buffalloc_chunk   Pointer to the new Buffalloc_chunk structure
  */
 Buffalloc_chunk *_mr_buffalloc_chunk_create(size_t size) {
-    Buffalloc_chunk *chunk = malloc(sizeof(Buffalloc_chunk)+size);
+    Buffalloc_chunk *chunk = malloc(sizeof(Buffalloc_chunk) + size);
     assert(chunk != NULL);
 
     chunk->next = NULL;
     chunk->free_size = size;
-    chunk->free_ptr = (void*)&chunk->_data;
+    chunk->free_ptr = (void*)(chunk + 1);
 
     return chunk;
 }

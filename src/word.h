@@ -28,7 +28,6 @@
         struct word_s* next;       /**<  Pointer a next word                  */
         unsigned int   count;      /**<  Word occurrences in a text           */
         unsigned int   length;     /**<  Number of characters in the word     */
-        void*          _name;
         /* /!\ Keep the last element at the end of the structure it is used
                to avoid handling muitple malloc for the structure and the string
                containing the spelling of the word. */

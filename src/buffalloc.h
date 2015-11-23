@@ -25,7 +25,6 @@
         void*                      free_ptr;   /**<  Pointer to free area     */
         struct buffalloc_chunk_s*  next;       /**<  Path to next chunk       */
         size_t                     free_size;  /**<  Memory available         */
-        void*                      _data;      /**<  Pointer to first data    */
     } Buffalloc_chunk;
 
 
