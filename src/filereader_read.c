@@ -112,6 +112,9 @@ Filereader* _mr_filereader_read_create(const char *file_path,
     fr->fd = open(file_path, O_RDONLY | O_NONBLOCK);
     assert(fr->fd >= 0);
 
+    /* Set filereader type */
+    fr->type = FR_MMAP;
+
     /* Set default offsets */
     mr_filereader_read_set_offsets(fr, 0, fr->file_size);
 

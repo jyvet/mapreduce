@@ -124,6 +124,9 @@ Filereader* _mr_filereader_mmap_create(const char *file_path,
     ext->shared_map = NULL;
     fr->ext = ext;
 
+    /* Set filereader type */
+    fr->type = FR_MMAP;
+
     /* Set default offsets */
     mr_filereader_mmap_set_offsets(fr, 0, fr->file_size - 1);
 

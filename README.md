@@ -54,13 +54,22 @@ Options are :
 
     -p, --profiling            Activate profiling
     -q, --quiet                Do not output results
+
         --parallel             Use mapreduce in parallel mode [default]
         --sequential           Use mapreduce in sequential mode
+
+        --mmap                 Use filereader with mmap [default]
+        --read                 Use filereader with read
+        --read-buffer=BYTES    Size of the Buffer for filereader in read mode
+                               [default=16384]
+
         --iwords               Use wordstreamer with interleaved words
         --schunks              Use wordstreamer with scattered chunks [default]
+
     -?, --help                 Give this help list
         --usage                Give a short usage message
     -V, --version              Print program version
+
 
 
 Examples with provided samples
@@ -94,16 +103,12 @@ Running Mapreduce in quiet and profiling modes:
 will display something similar to:
 
     |-[WordStreamer 0] get: 8.196 ms
-    |-[Dictionary] hash function: 0.483 ms
     |-[Dictionary] put: 2.299 ms
     |-[WordStreamer 1] get: 2.200 ms
-    |-[Dictionary] hash function: 0.472 ms
     |-[Dictionary] put: 2.451 ms
     |-[WordStreamer 2] get: 2.276 ms
-    |-[Dictionary] hash function: 0.476 ms
     |-[Dictionary] put: 2.395 ms
     |-[WordStreamer 3] get: 2.278 ms
-    |-[Dictionary] hash function: 0.476 ms
     |-[Dictionary] put: 2.215 ms
     |-[MapReduce] map: 8.036 ms
     |-[MapReduce] reduce: 0.912 ms
@@ -119,16 +124,12 @@ Tests are performed with an *Intel i5-3427U CPU* @ 1.80GHz (4 SMT, 2 cores) and 
 
     % ./mapred lorem_verylarge.txt 4 -q -p
     |-[WordStreamer 0] get: 844.262 ms
-    |-[Dictionary] hash function: 151.677 ms
     |-[Dictionary] put: 2508.536 ms
     |-[WordStreamer 1] get: 808.657 ms
-    |-[Dictionary] hash function: 152.090 ms
     |-[Dictionary] put: 2548.914 ms
     |-[WordStreamer 2] get: 805.632 ms
-    |-[Dictionary] hash function: 151.849 ms
     |-[Dictionary] put: 2545.457 ms
     |-[WordStreamer 3] get: 810.067 ms
-    |-[Dictionary] hash function: 151.784 ms
     |-[Dictionary] put: 2558.705 ms
     |-[MapReduce] map: 3567.679 ms
     |-[MapReduce] reduce: 21.714 ms
