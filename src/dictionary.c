@@ -110,12 +110,8 @@ unsigned int _mr_dictionary_hash(Dictionary *dico, const char *word) {
     unsigned int word_length = strlen(word);
     unsigned int hash;
 
-    if (word_length > 1) {
-        hash = (unsigned char)word[0]*HASH_CHAR_SIZE
-                                 + (unsigned char)word[1];
-    } else {
-        hash = (unsigned char)word[0]*HASH_CHAR_SIZE;
-    }
+    hash = (unsigned char)word[0] * HASH_CHAR_SIZE;
+    if (word_length > 1) hash += (unsigned char)word[1];
 
     return hash;
 }
